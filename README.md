@@ -1,34 +1,32 @@
-Computational Calculus Laboratory
+# Computational Calculus Laboratory
 
-Computational Calculus Laboratory is an interactive, modular, and extensible computational mathematics project designed to explore calculus through symbolic computation, numerical methods, visualization, and mathematical verification.
+**Milestone 1 — Foundation & Mathematical Function Engine**
 
-The project aims to transform traditional calculus concepts into interactive computational experiments, allowing users to not only calculate mathematical results but also visualize, analyze, verify, and understand the underlying mathematics.
+## Project Description
+The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. Its long-term goal is to provide a high-quality suite for limits, differentiation, integration, multivariable calculus, and numerical methods. 
 
-The laboratory will progressively cover topics including:
+This repository currently represents **Milestone 1**. It does *not* contain the complete calculus laboratory yet. Instead, it lays down a strictly typed, modular, and safe foundation focusing on mathematical string parsing, symbolic representation, fundamental analysis, and robust visualization.
 
-- Limits
-- Continuity
-- Differential Calculus
-- Applications of Derivatives
-- Integral Calculus
-- Infinite Series
-- Taylor & Maclaurin Series
-- Multivariable Calculus
-- Vector Calculus
-- Numerical Calculus
-- Mathematical Error Analysis
-- Interactive Mathematical Visualization
+## Features Implemented
+* **Safe Mathematical Parsing:** Utilizes SymPy to parse string functions securely, avoiding python `eval()`.
+* **Symbolic Representation:** Simplifies, expands, and factorizes algebraic equations.
+* **Function Evaluation:** Solves continuous and discontinuous expressions (e.g., $1/x$) seamlessly.
+* **Function Tables:** Generates step-based datasets across bounded intervals.
+* **Basic Visualization:** 2D graphing engine with smart asymptote handling built on Matplotlib.
+* **Numerical Validation:** Foundation for absolute and relative error mathematics.
+* **Interactive UI:** A modular Streamlit frontend isolating interface logic from mathematical operations.
 
-The project is being developed incrementally through a series of milestones, with each milestone introducing a deeper and more advanced mathematical capability.
+## Technology Stack
+* **Language:** Python 3.9+
+* **Core Mathematics:** SymPy, NumPy
+* **Visualization:** Matplotlib
+* **UI Framework:** Streamlit
+* **Testing:** Pytest
 
-Core Philosophy
-
-Mathematics → Algorithm → Computation → Visualization → Verification
-
-The goal is not to build a simple calculator, but a serious computational laboratory for studying and experimenting with calculus.
-
-Current Status
-
-Milestone 1 — Foundation & Mathematical Function Engine
-
-The initial milestone establishes the project's mathematical, computational, visualization, testing, and documentation foundations for future development.
+## Project Architecture
+```text
+app/             - Streamlit frontend routing
+calculus/        - Core symbolic manipulation and engine classes
+numerical/       - Pure mathematical and error-validation functions
+visualization/   - Reusable graphing components
+tests/           - Automated quality assurance tests
