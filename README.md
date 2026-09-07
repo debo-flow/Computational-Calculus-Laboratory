@@ -1,30 +1,27 @@
 # Computational Calculus Laboratory
 
-**Milestone 3 — Advanced Continuity Laboratory**
+**Milestone 4 — Advanced Differential Calculus Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 3 introduces the **Advanced Continuity Laboratory**. It builds upon the function engine (Milestone 1) and limits engine (Milestone 2) to provide rigorous mathematical analysis of continuous and discontinuous functions, supporting point-wise checking, piecewise functions, and interval mapping.
+Milestone 4 introduces the **Advanced Differential Calculus Laboratory**. This module builds seamlessly on top of limits and continuity, providing robust symbolic differentiation, rule identification, interactive geometric limits (secant-to-tangent), error analysis for numerical methods, and advanced techniques (implicit/parametric).
 
 ## Features Implemented
 
-### Milestone 3: Advanced Continuity
-* **Point Continuity Analysis:** Verifies $f(a)$, $\lim_{x \to a^-} f(x)$, and $\lim_{x \to a^+} f(x)$ to prove continuity.
-* **Discontinuity Classification:** Automatically detects Removable (holes), Jump, Infinite (asymptotes), and Oscillatory discontinuities.
-* **Piecewise Support:** Analyzes continuity boundaries natively through SymPy's Piecewise expressions.
-* **Visual States:** Matplotlib engine upgraded to render open holes (removable), solid points (continuous), and asymptotes.
-* **Interval Mapping:** Scans intervals $[a, b]$ for potential theoretical singularities/discontinuities.
-* **Numerical Verification:** Reuses limit tables to prove proximity to defined function points.
+### Milestone 4: Differential Calculus
+* **Symbolic Differentiation:** Uses SymPy to exact $n$-th order derivatives.
+* **Differentiation Rules:** Detects power, product, quotient, and chain rules.
+* **Geometric Limits:** Interactive visualization showing secant lines converging to tangent lines as $h \to 0$.
+* **Numerical Differentiation:** Forward, Backward, and Central difference equations.
+* **Error Analysis Table:** Dynamically shows floating-point cancellation errors when $h$ becomes too small.
+* **Advanced Derivation:** Implicit differentiation, Parametric equations, and Logarithmic differentiation.
+* **Differentiability Analysis:** Proves that Continuity does not imply Differentiability (e.g., $f(x) = |x|$ at $x=0$).
 
-### Milestone 2: Advanced Limits
-* Symbolic one-sided and two-sided limits.
-* Numerical convergence tables.
-* Infinite limits and error analysis.
-
-### Milestone 1: Foundation
-* Safe mathematical parsing.
-* Core evaluation, domain rules, and simplification logic.
+### Milestone 1-3 Features (Preserved)
+* Foundation mathematical engine.
+* Symbolic limit evaluation and tables.
+* Continuity evaluation and classification (jump, removable, infinite).
 
 ## Technology Stack
 * Python 3.9+
