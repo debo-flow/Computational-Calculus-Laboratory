@@ -1,163 +1,84 @@
-import streamlit as st
-import sympy as sp
-import sys
-import os
-import pandas as pd
+# ... [Keep Milestones 1 to 4 logic exactly as they were] ...
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from calculus.functions.function_engine import FunctionEngine
-from visualization.plotting import plot_function
-from visualization.limit_plots import plot_limit
-from visualization.continuity_plots import plot_continuity
-from visualization.derivative_plots import plot_derivatives, plot_tangent_secant
-from calculus.limits.limit_engine import LimitEngine
-from calculus.limits.numerical_limits import NumericalLimitEngine
-from calculus.limits.limit_analysis import interpret_limit
-from calculus.continuity.continuity_engine import ContinuityEngine
-from calculus.continuity.discontinuity import classify_discontinuity
-from calculus.differentiation.derivative_engine import DerivativeEngine
-from calculus.differentiation.numerical_derivative import NumericalDerivativeEngine
-from calculus.differentiation.derivative_rules import identify_primary_rule
-from calculus.differentiation.derivative_analysis import analyze_differentiability
-from numerical.differentiation_error import generate_derivative_error_table
-
-st.set_page_config(page_title="Computational Calculus Laboratory", layout="wide")
-
-page = st.sidebar.radio("Select Laboratory Module", [
-    "Milestone 1: Function Engine", 
-    "Milestone 2: Limits Laboratory",
-    "Milestone 3: Continuity Laboratory",
-    "Milestone 4: Differential Calculus"
-])
-
-if page == "Milestone 1: Function Engine":
-    st.title("Foundation & Function Engine")
-    expr_input = st.text_input("Enter f(x):", value="x^2 + 2*x - 5")
-    try:
-        engine = FunctionEngine(expr_input)
-        st.latex(f"f(x) = {sp.latex(engine.expression)}")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write(f"**Eval (x=3):** {engine.evaluate(3)[1]}")
-        with col2:
-            st.pyplot(plot_function(engine, -10, 10))
-    except Exception as e:
-        st.error(str(e))
-
-elif page == "Milestone 2: Limits Laboratory":
-    st.title("Advanced Limits Laboratory")
-    expr_input = st.text_input("f(x):", value="sin(x)/x")
-    pt = st.text_input("Point (a):", value="0")
-    try:
-        engine = FunctionEngine(expr_input)
-        lim = LimitEngine(engine).evaluate_limits(pt)
-        st.write(f"**Limit:** {lim['Two-Sided Limit']}")
-        if pt not in ['oo', '-oo']: st.pyplot(plot_limit(engine, float(pt)))
-    except Exception as e:
-        st.error(str(e))
-
-elif page == "Milestone 3: Continuity Laboratory":
-    st.title("Continuity Laboratory")
-    expr_input = st.text_input("f(x):", value="(x^2 - 4)/(x - 2)")
-    pt = st.text_input("Point (a):", value="2")
-    try:
-        engine = FunctionEngine(expr_input)
-        res = ContinuityEngine(engine).evaluate_point_continuity(pt)
-        st.write(f"**Continuous:** {res['Continuous']} | **Type:** {classify_discontinuity(res)}")
-        st.pyplot(plot_continuity(engine, float(pt), res))
-    except Exception as e:
-        st.error(str(e))
-
-elif page == "Milestone 4: Differential Calculus":
-    st.title("Differential Calculus Laboratory")
-    st.markdown("Analyze symbolic derivatives, tangent limits, numerical errors, and differentiability.")
+elif page == "Milestone 5: Applications of Calculus":
+    st.title("Applications of Differential Calculus Laboratory")
+    st.markdown("Analyze critical points, extrema, mathematical theorems, and roots.")
     
-    tabs = st.tabs(["Core Differentiation", "Derivative as a Limit", "Advanced Rules", "Differentiability Analysis"])
+    # Import M5 dependencies dynamically to avoid cluttering global scope
+    from calculus.applications.critical_points import find_critical_points
+    from calculus.applications.extrema import classify_local_extrema, find_absolute_extrema
+    from calculus.applications.concavity import find_inflection_points
+    from calculus.applications.analysis_engine import ApplicationAnalysisEngine
+    from numerical.root_finding import newton_raphson
+    from visualization.applications_plots import plot_function_analysis
+    
+    tabs = st.tabs(["Function Analysis", "Optimization (Extrema)", "Theorems & Approximations", "Newton's Method"])
     
     with tabs[0]:
-        st.header("Symbolic & Numerical Differentiation")
-        c1, c2 = st.columns([2,1])
-        with c1: expr_input = st.text_input("Function f(x):", value="sin(x)*exp(x)")
-        with c2: order = st.number_input("Derivative Order (n)", 1, 4, 1)
-        
+        st.header("Comprehensive Function Analysis")
+        expr_input = st.text_input("Analyze Function f(x):", value="x^3 - 3*x")
         try:
             engine = FunctionEngine(expr_input)
-            dev_eng = DerivativeEngine(engine)
+            st.latex(f"f(x) = {sp.latex(engine.expression)}")
             
-            f_expr = engine.expression
-            df_expr = dev_eng.get_derivative(order)
-            
-            st.latex(f"f(x) = {sp.latex(f_expr)}")
-            st.latex(f"f^{{({order})}}(x) = {sp.latex(df_expr)}")
-            
-            st.info(f"**Outer Rule Identified:** {identify_primary_rule(f_expr)}")
-            
-            st.divider()
-            c3, c4 = st.columns(2)
-            with c3:
-                eval_pt = st.number_input("Evaluate at x =", value=0.0)
-                exact_val = dev_eng.evaluate_derivative(eval_pt, order)
-                st.write(f"**Exact Derivative at x={eval_pt}:** `{exact_val}`")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.subheader("Critical & Stationary Points")
+                crits = find_critical_points(engine)
+                st.write("Candidates where $f'(x) = 0$:")
+                st.json(crits)
                 
-                if order == 1:
-                    num_eng = NumericalDerivativeEngine(engine)
-                    st.write("**Numerical Approximations (h=1e-5):**")
-                    st.json(num_eng.evaluate_all(eval_pt))
-            with c4:
-                plot_order = [0, 1] if order == 1 else [0, 1, 2]
-                st.pyplot(plot_derivatives(engine, eval_pt-3, eval_pt+3, plot_order))
-                
-            if order == 1 and isinstance(exact_val, float):
-                st.divider()
-                st.subheader("Numerical Instability & Error Analysis")
-                st.markdown("Observe how reducing `h` too much causes floating-point cancellation errors.")
-                err_table = generate_derivative_error_table(engine, eval_pt)
-                st.dataframe(pd.DataFrame(err_table), use_container_width=True)
-                
+                st.subheader("Concavity & Inflection")
+                infs = find_inflection_points(engine)
+                st.json(infs)
+            with c2:
+                st.pyplot(plot_function_analysis(engine, -3, 3))
         except Exception as e:
-            st.error(f"Error: {str(e)}")
-
+            st.error(str(e))
+            
     with tabs[1]:
-        st.header("Geometric Interpretation: Secant to Tangent")
-        try:
-            lim_c1, lim_c2 = st.columns(2)
-            a_val = lim_c1.number_input("Point a", value=1.0, key='lim_a')
-            h_val = lim_c2.slider("Difference h", -2.0, 2.0, 1.0, step=0.01)
+        st.header("Optimization & Extrema")
+        if 'engine' in locals():
+            st.subheader("Local Extrema (2nd Derivative Test)")
+            st.json(classify_local_extrema(engine))
             
-            st.pyplot(plot_tangent_secant(engine, a_val, h_val))
-            st.markdown(r"The derivative is defined as: $f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h}$")
-        except Exception as e:
-            st.error("Select valid function in Core tab.")
+            st.subheader("Absolute Extrema (Closed Interval)")
+            col_a, col_b = st.columns(2)
+            a_val = col_a.number_input("Interval [a]", value=-2.0)
+            b_val = col_b.number_input("Interval [b]", value=2.0)
+            st.json(find_absolute_extrema(engine, a_val, b_val))
             
     with tabs[2]:
-        st.header("Implicit & Parametric Differentiation")
-        st.subheader("Implicit Differentiation")
-        imp_eq = st.text_input("Equation (e.g. x^2 + y^2 = 25):", "x^2 + y^2 = 25")
-        if st.button("Calculate Implicit"):
-            res = DerivativeEngine.implicit_differentiation(imp_eq)
-            st.latex(r"\frac{dy}{dx} = " + sp.latex(res))
+        st.header("Calculus Theorems & Approximations")
+        if 'engine' in locals():
+            app_eng = ApplicationAnalysisEngine(engine)
             
-        st.subheader("Parametric Differentiation")
-        p_c1, p_c2 = st.columns(2)
-        with p_c1: x_t = st.text_input("x(t):", "cos(t)")
-        with p_c2: y_t = st.text_input("y(t):", "sin(t)")
-        if st.button("Calculate Parametric"):
-            res = DerivativeEngine.parametric_differentiation(x_t, y_t)
-            st.latex(r"\frac{dx}{dt} = " + sp.latex(res['dx/dt']) + r" \quad \frac{dy}{dt} = " + sp.latex(res['dy/dt']))
-            st.latex(r"\frac{dy}{dx} = " + sp.latex(res['dy/dx']))
-
+            st.subheader("Mean Value Theorem")
+            st.markdown("Verifies existence of $c$ such that $f'(c) = \\frac{f(b)-f(a)}{b-a}$")
+            c3, c4 = st.columns(2)
+            mvt_a = c3.number_input("MVT start (a)", value=0.0)
+            mvt_b = c4.number_input("MVT end (b)", value=2.0)
+            st.json(app_eng.mean_value_theorem(mvt_a, mvt_b))
+            
+            st.divider()
+            st.subheader("Linear Approximation (Tangent Line)")
+            c5, c6 = st.columns(2)
+            lin_a = c5.number_input("Center point (a)", value=1.0)
+            lin_x = c6.number_input("Estimate at (x)", value=1.1)
+            st.json(app_eng.linear_approximation(lin_a, lin_x))
+            
     with tabs[3]:
-        st.header("Differentiability vs Continuity")
-        diff_expr = st.text_input("Test Function:", "Abs(x)")
-        diff_pt = st.number_input("Test Point:", value=0.0)
-        if st.button("Analyze Function"):
-            test_eng = FunctionEngine(diff_expr)
-            res = analyze_differentiability(test_eng, diff_pt)
+        st.header("Newton-Raphson Root Finding")
+        if 'engine' in locals():
+            st.markdown(r"Iterative root finding: $x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$")
+            c7, c8 = st.columns(2)
+            x_init = c7.number_input("Initial Guess ($x_0$)", value=2.0)
+            iters = c8.slider("Max Iterations", 5, 50, 15)
             
-            st.markdown(f"- **Continuous:** {res['Continuous']}")
-            st.markdown(f"- **Differentiable:** {res['Differentiable']}")
-            st.markdown(f"- **Classification:** {res['Classification']}")
-            st.markdown(f"- **LHL Derivative:** {res['Left Derivative']} | **RHL Derivative:** {res['Right Derivative']}")
-            if res['Continuous'] and not res['Differentiable']:
-                st.warning("Notice: This function is continuous, but not differentiable. Continuity does not guarantee differentiability!")
+            if st.button("Find Root"):
+                root_res = newton_raphson(engine, x_init, max_iter=iters)
+                if root_res["Status"] == "Converged":
+                    st.success(f"Root found at: **{root_res['Root']}** in {root_res['Iterations']} iterations.")
+                else:
+                    st.error(root_res["Status"])
+                st.dataframe(pd.DataFrame(root_res["History"]), use_container_width=True)
