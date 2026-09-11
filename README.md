@@ -1,27 +1,27 @@
 # Computational Calculus Laboratory
 
-**Milestone 4 — Advanced Differential Calculus Laboratory**
+**Milestone 5 — Applications of Differential Calculus Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 4 introduces the **Advanced Differential Calculus Laboratory**. This module builds seamlessly on top of limits and continuity, providing robust symbolic differentiation, rule identification, interactive geometric limits (secant-to-tangent), error analysis for numerical methods, and advanced techniques (implicit/parametric).
+Milestone 5 introduces the **Applications of Differential Calculus**. Building on the strict mathematical foundation of M1-M4, this milestone turns abstract derivatives into powerful applied tools: finding optimal solutions, proving theorems, approximating values, and executing algorithmic root-finding.
 
 ## Features Implemented
 
-### Milestone 4: Differential Calculus
-* **Symbolic Differentiation:** Uses SymPy to exact $n$-th order derivatives.
-* **Differentiation Rules:** Detects power, product, quotient, and chain rules.
-* **Geometric Limits:** Interactive visualization showing secant lines converging to tangent lines as $h \to 0$.
-* **Numerical Differentiation:** Forward, Backward, and Central difference equations.
-* **Error Analysis Table:** Dynamically shows floating-point cancellation errors when $h$ becomes too small.
-* **Advanced Derivation:** Implicit differentiation, Parametric equations, and Logarithmic differentiation.
-* **Differentiability Analysis:** Proves that Continuity does not imply Differentiability (e.g., $f(x) = |x|$ at $x=0$).
+### Milestone 5: Applications
+* **Critical Point & Extrema Detection:** Employs the First and Second Derivative tests to automatically classify local minima and maxima.
+* **Closed Interval Optimization:** Strictly determines Absolute Max/Min on bounded intervals $[a, b]$.
+* **Theorem Verification:** Computes the mathematical guarantees of the **Mean Value Theorem** and **Rolle's Theorem**, solving for candidates $c$.
+* **Concavity & Inflection:** Analyzes $f''(x)$ to determine concavity boundaries.
+* **Newton-Raphson Engine:** Algorithmic root-finding with built-in iteration limiters, derivative failure detection, and history tracking.
+* **Approximations:** Computes Linear (Tangent) Approximations and Absolute Error tables dynamically.
 
-### Milestone 1-3 Features (Preserved)
-* Foundation mathematical engine.
-* Symbolic limit evaluation and tables.
-* Continuity evaluation and classification (jump, removable, infinite).
+### Earlier Milestones (Preserved)
+* **M4:** Advanced Differentiation (Rules, Symbolic, Numerical limits).
+* **M3:** Continuity and Discontinuity Classification.
+* **M2:** Limits Laboratory (LHL/RHL, Infinity).
+* **M1:** Core Foundation (Parsing, Validation).
 
 ## Technology Stack
 * Python 3.9+
