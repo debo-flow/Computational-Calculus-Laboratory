@@ -1,28 +1,29 @@
 # Computational Calculus Laboratory
 
-**Milestone 8 — Advanced Numerical Integration Laboratory**
+**Milestone 9 — Advanced Sequences & Infinite Series Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 8 introduces the **Advanced Numerical Integration Laboratory**. Bridging analytical integration and computational limitations, this update brings a complete quadrature suite allowing rigorous benchmarking of classical methods, theoretical bounding, and dynamic adaptive refinement for oscillatory or highly-peaked functions. 
+Milestone 9 introduces the **Advanced Sequences & Infinite Series Laboratory**. It transitions the platform from continuous functions to discrete domains ($n \in \mathbb{N}$). It features robust analytical testing (Ratio, Root, N-th Term, Alternating) to prove infinite series convergence, partial sum generation, and strict distinction between term limits and summation limits.
 
 ## Features Implemented
 
-### Milestone 8: Advanced Numerical Integration
-* **Quadrature Engine:** Implements composite Trapezoidal, Simpson 1/3, and Simpson 3/8 rules, strictly enforcing mathematical node requirements.
-* **Gaussian Quadrature:** Integrates Gauss-Legendre node-weight transformations from the standard domain $[-1, 1]$ to $[a, b]$ for extreme polynomial accuracy.
-* **Adaptive Integration:** A recursive Adaptive Simpson implementation that estimates local error ($|S(a,b) - (S_L+S_R)| / 15$) and refines the mesh exclusively where the function exhibits rapid change. Includes subdivision plotting.
-* **Error Bounding & Convergence:** Compares theoretical absolute error bounds (using symbolic derivatives $\max|f''(x)|$) to observed $O(h^p)$ convergence via n-stepping log ratios.
-* **Data & Cumulative Integration:** Safely integrates non-uniform discrete data arrays, and computationally constructs cumulative area vectors $F(x) = \int f(t) dt$ to demonstrate FTC computationally.
+### Milestone 9: Sequences & Infinite Series
+* **Sequence Analysis:** Computes $\lim_{n \to \infty} a_n$, evaluates symbolic monotonicity via derivative mapping, and deduces global boundedness.
+* **Convergence Test Coordinator:** Automatically subjects $\Sigma a_n$ to the N-th Term Test, Ratio Test ($|a_{n+1}/a_n|$), Root Test ($\sqrt[n]{|a_n|}$), and Alternating Series Test.
+* **Strict Mathematical Logic:** Enforces the rule that $a_n \to 0$ is a *necessary* but NOT *sufficient* condition for convergence (e.g., the Harmonic series).
+* **Exact vs Partial Sums:** Evaluates $S_N = \sum_{1}^N a_n$ iteratively while using SymPy to hunt for the exact infinite analytic limit. 
+* **Discrete Visualization:** Matplotlib scatter plots for discrete sequence terms overlaid with step-plots indicating partial sum accumulation.
 
 ### Earlier Milestones (Preserved)
-* **M7:** Advanced Integral Calculus (Symbolic $+C$, FTC, Area between curves, substitution).
-* **M6:** Advanced Numerical Differentiation (Stencils, Truncation vs Round-off, Richardson Extrapolation).
-* **M5:** Applications of Differential Calculus (Extrema, Critical Points, MVT, Newton-Raphson).
-* **M4:** Advanced Differential Calculus (Symbolic/Numerical derivatives, Tangents/Secants).
+* **M8:** Advanced Numerical Integration (Quadrature, Gaussian, Adaptive).
+* **M7:** Advanced Integral Calculus (Symbolic $+C$, FTC, substitutions).
+* **M6:** Advanced Numerical Differentiation.
+* **M5:** Applications of Differential Calculus (Extrema, MVT).
+* **M4:** Advanced Differential Calculus (Rules, Tangents).
 * **M3:** Continuity and Discontinuity Classification.
-* **M2:** Limits Laboratory (LHL, RHL, Infinite Limits).
+* **M2:** Limits Laboratory (LHL/RHL).
 * **M1:** Core Foundation & Mathematical Function Engine.
 
 ## Technology Stack
