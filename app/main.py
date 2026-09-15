@@ -1,93 +1,111 @@
-# ... [Keep Milestones 1 to 9 unchanged] ...
+# ... [Keep Milestones 1 to 10 unchanged] ...
 
-elif page == "Milestone 10: Taylor & Maclaurin Series":
-    st.title("Advanced Taylor & Maclaurin Series Laboratory")
-    st.markdown("Generate Taylor polynomials, analyze Lagrange error bounds, and visualize local convergence.")
+elif page == "Milestone 11: Multivariable Calculus":
+    st.title("Advanced Multivariable Calculus Laboratory")
+    st.markdown("Analyze partial derivatives, gradients, critical points, and multiple integrals.")
     
-    from calculus.taylor.taylor_engine import TaylorEngine
-    from calculus.taylor.taylor_analysis import calculus_on_taylor
-    from visualization.taylor_plots import plot_taylor_approximation, plot_taylor_error_map
+    from calculus.multivariable.multivariable_engine import MultivariableEngine
+    from calculus.multivariable.partial_derivatives import compute_partial, compare_mixed_partials
+    from calculus.multivariable.gradient import compute_gradient, evaluate_gradient
+    from calculus.multivariable.directional_derivatives import directional_derivative
+    from calculus.multivariable.tangent_plane import compute_tangent_plane
+    from calculus.multivariable.jacobian import compute_jacobian
+    from calculus.multivariable.critical_points import find_multivariable_critical_points
+    from calculus.multivariable.optimization import lagrange_multipliers
+    from calculus.multivariable.multivariable_analysis import path_limit_exploration
+    from calculus.multivariable.multiple_integrals import double_integral_rectangular
+    from visualization.multivariable_plots import plot_3d_surface, plot_contours_and_gradients
+    
+    tabs = st.tabs(["Surfaces & Gradients", "Derivatives & Tangents", "Critical Points & Hessian", "Lagrange Optimization", "Multiple Integrals", "Jacobian"])
 
-    c1, c2, c3 = st.columns([2, 1, 1])
-    with c1: expr_input = st.text_input("Function f(x):", value="exp(x)")
-    with c2: a_input = st.number_input("Expansion Point (a):", value=0.0)
-    with c3: order_input = st.number_input("Order (n):", value=3, min_value=0, max_value=30)
+    c1, c2 = st.columns(2)
+    with c1: expr_input = st.text_input("Scalar Field $f(x,y)$:", value="x^2 - y^2")
+    with c2: point_input = st.text_input("Evaluation Point (a, b):", value="1.0, 1.0")
     
     try:
-        engine = FunctionEngine(expr_input)
-        t_engine = TaylorEngine(engine, a=a_input)
-        T_n = t_engine.get_polynomial(order_input)
-        
-        st.latex(f"T_{{{order_input}}}(x) = {sp.latex(T_n)}")
-        
-        tabs = st.tabs(["Polynomial & Coefficients", "Error & Remainder Bounds", "Convergence & Verification", "Visualization"])
-        
-        with tabs[0]:
-            st.header("Taylor Coefficients & Expansion")
-            st.markdown(r"Taylor Series formula: $f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!} (x-a)^n$")
-            
-            coeffs = t_engine.get_coefficients(order_input)
-            df_coeffs = pd.DataFrame(coeffs)
-            df_coeffs["c_n"] = df_coeffs["c_n"].astype(str)
-            df_coeffs["f^(n)(a)"] = df_coeffs["f^(n)(a)"].astype(str)
-            st.dataframe(df_coeffs, use_container_width=True)
-            
-            st.subheader("Calculus on Taylor Polynomials")
-            st.markdown("Notice how differentiating $T_n(x)$ approximates $f'(x)$ at order $n-1$.")
-            calc_res = calculus_on_taylor(t_engine.poly, order_input)
-            st.latex(r"\frac{d}{dx}[T_n(x)] = " + sp.latex(calc_res["d/dx [T_n(x)]"]))
-            
-        with tabs[1]:
-            st.header("Remainder & Error Analysis")
-            st.markdown(r"**Taylor's Theorem:** $f(x) = T_n(x) + R_n(x)$")
-            st.markdown(r"**Lagrange Bound:** $|R_n(x)| \le \frac{M}{(n+1)!} |x-a|^{n+1}$ where $M = \max |f^{(n+1)}(t)|$")
-            
-            x_eval = st.number_input("Evaluation Point (x):", value=1.0)
-            
-            rem_res = t_engine.get_remainder_analysis(x_eval, order_input)
-            if rem_res["Status"] == "Success":
-                st.write(f"- **Exact $f(x)$:** `{rem_res['Exact f(x)']}`")
-                st.write(f"- **Approximation $T_n(x)$:** `{rem_res['Taylor T_n(x)']}`")
-                st.write(f"- **Actual Error:** `{rem_res['Actual Error']}`")
-                st.write(f"- **Lagrange Error Bound:** `{rem_res['Lagrange Error Bound']}`")
-                if isinstance(rem_res['Lagrange Error Bound'], float):
-                    st.success("✅ The actual error is strictly within the theoretical Lagrange bound.")
-            else:
-                st.error(rem_res["Reason"])
-                
-            st.divider()
-            st.subheader("Order Selection via Target Tolerance")
-            tol_val = st.number_input("Target Tolerance $\epsilon$:", value=1e-5, format="%.6f")
-            if st.button("Find Minimum Required Order"):
-                ord_res = t_engine.find_target_order(x_eval, tol_val)
-                st.json(ord_res)
-                
-        with tabs[2]:
-            st.header("Convergence & Symbolic Verification")
-            
-            st.subheader("1. Radius & Interval of Convergence")
-            roc = t_engine.get_convergence()
-            st.write(f"- **Radius (R):** `{roc['R']}`")
-            st.write(f"- **Interval:** `{roc['Interval']}`")
-            st.info(f"Methodology: {roc['Note']}")
-            
-            st.subheader("2. Derivative Condition Verification")
-            st.markdown("Verifying that $T_n^{(k)}(a) = f^{(k)}(a)$ for all $k \le n$.")
-            ver_res = t_engine.verify_polynomial(order_input)
-            if ver_res["All Verified"]:
-                st.success("✅ All initial value derivative conditions verified symbolically.")
-            else:
-                st.warning("Verification failed or was symbolically indeterminate.")
-                
-        with tabs[3]:
-            st.header("Visualizing Convergence & Error")
-            v1, v2 = st.columns(2)
-            with v1:
-                st.pyplot(plot_taylor_approximation(t_engine, order_input))
-            with v2:
-                # Compare current order, half order, and n=1
-                map_orders = list(set([1, max(1, order_input//2), order_input]))
-                st.pyplot(plot_taylor_error_map(t_engine, map_orders))
-                
+        m_eng = MultivariableEngine(expr_input)
+        pt = [float(p.strip()) for p in point_input.split(',')]
+        x, y = m_eng.vars
     except Exception as e:
-        st.error(f"Error parsing function or generating polynomial: {e}")
+        st.error(f"Initialization Error: {e}")
+        st.stop()
+
+    with tabs[0]:
+        st.header("3D Surface & Contour Mapping")
+        v1, v2 = st.columns(2)
+        with v1:
+            st.pyplot(plot_3d_surface(m_eng, (-3, 3), (-3, 3)))
+        with v2:
+            st.pyplot(plot_contours_and_gradients(m_eng, (-3, 3), (-3, 3)))
+            
+        st.divider()
+        st.subheader("Multivariable Path Limits")
+        st.markdown(r"Evaluating $\lim_{(x,y) \to (a,b)}$ along standard paths.")
+        st.json(path_limit_exploration(m_eng, pt))
+
+    with tabs[1]:
+        st.header("Partial Derivatives, Gradients & Tangent Planes")
+        st.latex(r"\nabla f = \left\langle \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y} \right\rangle = " + sp.latex(compute_gradient(m_eng)["Gradient"]))
+        
+        st.subheader("Directional Derivative")
+        u_str = st.text_input("Direction Vector (v_x, v_y):", "1, 1")
+        u_vec = [float(u.strip()) for u in u_str.split(',')]
+        d_res = directional_derivative(m_eng, u_vec, pt)
+        st.write(f"- **Unit Direction:** `{d_res['Unit Vector']}`")
+        st.write(f"- **Directional Derivative $D_u f(a,b)$:** `{d_res['Evaluated D_u']}`")
+        st.write(f"- **Maximum Rate of Change ($|\\nabla f|$):** `{d_res['Max Rate of Change']}`")
+        
+        st.divider()
+        st.subheader("Tangent Plane & Linear Approximation")
+        tp_res = compute_tangent_plane(m_eng, pt)
+        st.latex("z = f(a,b) + f_x(a,b)(x-a) + f_y(a,b)(y-b)")
+        st.latex(f"L(x,y) = {sp.latex(tp_res.get('Tangent Plane Equation', 'Error'))}")
+        st.info(f"**Differential:** $df = {sp.latex(tp_res.get('Differential df', 'Error'))}$")
+
+    with tabs[2]:
+        st.header("Critical Points & Second Derivative Test")
+        st.markdown(r"Finds where $\nabla f = \vec{0}$ and evaluates the Hessian Discriminant $D = f_{xx}f_{yy} - (f_{xy})^2$.")
+        
+        crits = find_multivariable_critical_points(m_eng)
+        if crits:
+            for c in crits:
+                st.markdown(f"**Point:** `{c['Point']}`")
+                st.json(c["Classification"])
+        else:
+            st.warning("No critical points found or system too complex for symbolic solver.")
+
+    with tabs[3]:
+        st.header("Constrained Optimization: Lagrange Multipliers")
+        st.markdown(r"Solves $\nabla f = \lambda \nabla g$ subject to $g(x,y) = 0$.")
+        g_input = st.text_input("Constraint Equation $g(x,y) = 0$ (e.g. x^2 + y^2 - 1):", value="x^2 + y^2 - 1")
+        if st.button("Solve System"):
+            l_res = lagrange_multipliers(m_eng, g_input)
+            st.json(l_res)
+
+    with tabs[4]:
+        st.header("Double Integrals over Rectangular Domains")
+        st.markdown(r"$\iint_D f(x,y) \, dA$ represents the signed volume under the surface.")
+        i1, i2 = st.columns(2)
+        with i1: x_bnds = st.text_input("x bounds (c, d):", "0, 1")
+        with i2: y_bnds = st.text_input("y bounds (a, b):", "0, 1")
+        
+        if st.button("Compute Double Integral"):
+            xb = tuple(x_bnds.split(','))
+            yb = tuple(y_bnds.split(','))
+            int_res = double_integral_rectangular(m_eng, xb, yb)
+            st.write(f"**Exact Integral:** `{int_res['Final Exact Integral']}`")
+            st.write(f"**Numerical Value:** `{int_res['Numerical Value']}`")
+            st.info(int_res["Interpretation"])
+
+    with tabs[5]:
+        st.header("Jacobian Matrix & Transformations")
+        st.markdown(r"For transformations $F(u, v) = (x(u,v), y(u,v))$:")
+        j1, j2 = st.columns(2)
+        with j1: eq1 = st.text_input("Function 1 (e.g., r*cos(theta)):", "r*cos(theta)")
+        with j2: eq2 = st.text_input("Function 2 (e.g., r*sin(theta)):", "r*sin(theta)")
+        v_str = st.text_input("Variables:", "r, theta")
+        
+        j_res = compute_jacobian([eq1, eq2], v_str)
+        st.latex("J = " + sp.latex(j_res["Jacobian Matrix"]))
+        st.markdown(f"**Jacobian Determinant $|J|$:**")
+        st.latex(sp.latex(j_res["Determinant"]))
