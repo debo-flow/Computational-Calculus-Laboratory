@@ -1,22 +1,24 @@
 # Computational Calculus Laboratory
 
-**Milestone 9 — Advanced Sequences & Infinite Series Laboratory**
+**Milestone 10 — Advanced Taylor & Maclaurin Series Laboratory**
 
 ## Project Description
-The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
+The Computational Calculus Laboratory is a comprehensive, extensible Python-based interactive mathematics environment. 
 
-Milestone 9 introduces the **Advanced Sequences & Infinite Series Laboratory**. It transitions the platform from continuous functions to discrete domains ($n \in \mathbb{N}$). It features robust analytical testing (Ratio, Root, N-th Term, Alternating) to prove infinite series convergence, partial sum generation, and strict distinction between term limits and summation limits.
+Milestone 10 introduces the **Advanced Taylor & Maclaurin Series Laboratory**. This final single-variable calculus component leverages the differentiation engine, symbolic limits, and root-finding utilities to generate $T_n(x)$, compute precise Lagrange Error Bounds, analyze the Radius of Convergence via complex plane singularities, and dynamically select Taylor orders required for requested error tolerances.
 
 ## Features Implemented
 
-### Milestone 9: Sequences & Infinite Series
-* **Sequence Analysis:** Computes $\lim_{n \to \infty} a_n$, evaluates symbolic monotonicity via derivative mapping, and deduces global boundedness.
-* **Convergence Test Coordinator:** Automatically subjects $\Sigma a_n$ to the N-th Term Test, Ratio Test ($|a_{n+1}/a_n|$), Root Test ($\sqrt[n]{|a_n|}$), and Alternating Series Test.
-* **Strict Mathematical Logic:** Enforces the rule that $a_n \to 0$ is a *necessary* but NOT *sufficient* condition for convergence (e.g., the Harmonic series).
-* **Exact vs Partial Sums:** Evaluates $S_N = \sum_{1}^N a_n$ iteratively while using SymPy to hunt for the exact infinite analytic limit. 
-* **Discrete Visualization:** Matplotlib scatter plots for discrete sequence terms overlaid with step-plots indicating partial sum accumulation.
+### Milestone 10: Taylor & Maclaurin Series
+* **Polynomial Generation:** Symbolically generates $T_n(x)$ and explicitly maps cached coefficients $c_n = f^{(n)}(a)/n!$.
+* **Taylor's Theorem & Lagrange Remainders:** Numerically bounds $M = \max |f^{(n+1)}(t)|$ on $[a, x]$ to explicitly contrast Actual Approximation Error with Theoretical Error Bounds.
+* **Symbolic Verification:** Evaluates $T_n^{(k)}(a) == f^{(k)}(a)$ to mathematically prove the foundational conditions of Taylor polynomials.
+* **Convergence Radii:** Discovers distances to complex singularities to establish the absolute radius of convergence ($R$) and intervals of valid approximations.
+* **Dynamic Order Selection:** Recursively iterates through Taylor orders to locate the minimal $n$ required to satisfy user-defined target tolerances.
+* **Error Map Visualization:** Plots the original function overlaid with polynomial approximations, alongside semi-log error maps ($E_n(x) = |f(x) - T_n(x)|$).
 
 ### Earlier Milestones (Preserved)
+* **M9:** Advanced Sequences & Infinite Series (Ratio/Root/Integral Tests, Convergence).
 * **M8:** Advanced Numerical Integration (Quadrature, Gaussian, Adaptive).
 * **M7:** Advanced Integral Calculus (Symbolic $+C$, FTC, substitutions).
 * **M6:** Advanced Numerical Differentiation.
