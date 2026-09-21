@@ -1,115 +1,129 @@
-# ... [Keep Milestones 1 to 11 unchanged] ...
+# ... [Keep Milestones 1 to 12 unchanged] ...
 
-elif page == "Milestone 12: Multiple Integrals":
-    st.title("Advanced Multiple Integrals & Multivariable Analysis")
-    st.markdown("Evaluate iterated integrals, calculate Jacobians, analyze physical laminas, and benchmark Monte Carlo stochastic integration.")
-    
-    from calculus.multivariable.multivariable_engine import MultivariableEngine
-    from calculus.multiple_integrals.double_integrals import compute_double_integral, change_integration_order
-    from calculus.multiple_integrals.triple_integrals import compute_triple_integral
-    from calculus.multiple_integrals.coordinate_transformations import get_polar_transformation, get_cylindrical_transformation, get_spherical_transformation
-    from calculus.multiple_integrals.jacobian_integration import apply_coordinate_transformation
-    from calculus.multiple_integrals.applications import compute_lamina_properties
-    from calculus.multiple_integrals.multiple_integral_analysis import monte_carlo_double_integral, monte_carlo_convergence_study
-    from visualization.multiple_integral_plots import plot_double_integral_region, plot_monte_carlo_samples
-    
-    tabs = st.tabs(["Iterated Integrals & Area", "Coordinate Transformations", "Physical Applications", "Monte Carlo & Numerical"])
+elif page == "Milestone 13: Vector Calculus":
+    st.title("Advanced Vector Calculus Laboratory")
+    st.markdown("Analyze parametric curves, vector fields, operators, and fundamental theorems.")
+
+    from calculus.vector_calculus.vector_engine import VectorFunctionEngine
+    from calculus.vector_calculus.vector_fields import VectorFieldEngine
+    from calculus.vector_calculus.vector_functions import compute_kinematics, compute_arc_length
+    from calculus.vector_calculus.curvature import compute_curvature_and_tangent
+    from calculus.vector_calculus.divergence import compute_divergence
+    from calculus.vector_calculus.curl import compute_curl
+    from calculus.vector_calculus.laplacian import compute_scalar_laplacian
+    from calculus.vector_calculus.line_integrals import vector_line_integral
+    from calculus.vector_calculus.flux import compute_flux
+    from calculus.vector_calculus.theorems import verify_greens_theorem, verify_divergence_theorem
+    from visualization.vector_calculus_plots import plot_2d_vector_field, plot_parametric_curve_3d
+
+    tabs = st.tabs([
+        "Parametric Curves & Kinematics", 
+        "Vector Fields (Div, Curl, Laplacian)", 
+        "Line Integrals & Work", 
+        "Surface Integrals & Flux", 
+        "Vector Theorems"
+    ])
 
     with tabs[0]:
-        st.header("Double & Triple Integrals")
-        
-        st.subheader("1. Double Integral over Rectangular Region $D$")
-        c1, c2, c3 = st.columns([2, 1, 1])
-        with c1: d_expr = st.text_input("Integrand $f(x,y)$:", value="x^2 + y^2")
-        with c2: xb = st.text_input("x bounds (a, b):", "0, 2")
-        with c3: yb = st.text_input("y bounds (c, d):", "0, 3")
-        
+        st.header("Parametric Curves $r(t) = \\langle x(t), y(t), z(t) \\rangle$")
+        c1, c2, c3 = st.columns(3)
+        with c1: x_t = st.text_input("x(t):", "cos(t)")
+        with c2: y_t = st.text_input("y(t):", "sin(t)")
+        with c3: z_t = st.text_input("z(t):", "t")
+
         try:
-            m_eng = MultivariableEngine(d_expr, "x, y")
-            x_bnds = tuple(float(v.strip()) for v in xb.split(','))
-            y_bnds = tuple(float(v.strip()) for v in yb.split(','))
+            r_eng = VectorFunctionEngine([x_t, y_t, z_t])
+            kin = compute_kinematics(r_eng)
+            curv = compute_curvature_and_tangent(r_eng)
             
-            d_res = compute_double_integral(m_eng, x_bnds, y_bnds, "yx")
+            st.latex(r"r(t) = \langle " + sp.latex(r_eng.components[0]) + ", " + sp.latex(r_eng.components[1]) + ", " + sp.latex(r_eng.components[2]) + r"\rangle")
+            st.write(f"- **Velocity $v(t)$:** `{kin['Velocity (v)']}`")
+            st.write(f"- **Acceleration $a(t)$:** `{kin['Acceleration (a)']}`")
+            st.write(f"- **Speed $\vert{}v(t)\vert{}$:** `{kin['Speed (|v|)']}`")
+            st.write(f"- **Unit Tangent $T(t)$:** `{curv['Unit Tangent (T)']}`")
+            st.write(f"- **Curvature $\kappa(t)$:** `{curv['Curvature (kappa)']}`")
             
-            st.latex(r"\iint_D " + sp.latex(m_eng.expression) + r" \, dA = " + sp.latex(d_res.get("Exact Result", "Error")))
-            st.write(f"- **Numerical Value:** `{d_res.get('Numerical Result')}`")
-            st.write(f"- **Region Type:** `{d_res.get('Region Type')}`")
+            st.subheader("Arc Length $L = \int \vert{}r'(t)\vert{} dt$")
+            l1, l2 = st.columns(2)
+            with l1: t_start = st.number_input("t start:", value=0.0)
+            with l2: t_end = st.number_input("t end:", value=6.28318)
+            l_res = compute_arc_length(r_eng, t_start, t_end)
+            st.write(f"**Arc Length Exact:** `{l_res.get('Integral')}` | **Numerical:** `{l_res.get('Numerical')}`")
             
-            st.info("**Fubini's Theorem Check:** Reversing integration order...")
-            fubini = change_integration_order(m_eng, x_bnds, y_bnds)
-            st.write(f"- dx dy Result: `{fubini['dx dy Result']}`")
-            st.write(f"- dy dx Result: `{fubini['dy dx Result']}`")
-            if fubini["Fubini Theorem Holds"]:
-                st.success("✅ Fubini's Theorem verified: Both orders yield identical results over the constant domain.")
-                
-            st.pyplot(plot_double_integral_region(x_bnds, y_bnds))
-                
+            st.pyplot(plot_parametric_curve_3d(x_t, y_t, z_t, (t_start, t_end)))
         except Exception as e:
-            st.error(f"Error computing double integral: {e}")
-            
-        st.divider()
-        st.subheader("2. Triple Integral (Iterated)")
-        t_expr = st.text_input("Integrand $f(x,y,z)$:", value="x * y * z")
-        zb = st.text_input("z bounds (e, f):", "0, 1")
-        if st.button("Compute Triple Integral"):
-            t_eng = MultivariableEngine(t_expr, "x, y, z")
-            z_bnds = tuple(float(v.strip()) for v in zb.split(','))
-            t_res = compute_triple_integral(t_eng, x_bnds, y_bnds, z_bnds)
-            st.latex(r"\iiint_V " + sp.latex(t_eng.expression) + r" \, dV = " + sp.latex(t_res.get("Exact Result", "Error")))
+            st.error(str(e))
 
     with tabs[1]:
-        st.header("Coordinate Transformations & Jacobians")
-        st.markdown(r"Transforms $f(x,y,z)$ into new coordinates, calculates Jacobian $|J|$, and returns $f(u,v,w)|J|$.")
+        st.header("Vector Fields $F(x,y,z) = \\langle P, Q, R \\rangle$")
+        v1, v2, v3 = st.columns(3)
+        with v1: P_x = st.text_input("P(x,y,z):", "-y")
+        with v2: Q_x = st.text_input("Q(x,y,z):", "x")
+        with v3: R_x = st.text_input("R(x,y,z):", "0")
         
-        system = st.selectbox("Select Target Coordinate System:", ["Polar (2D)", "Cylindrical (3D)", "Spherical (3D)"])
-        jac_expr = st.text_input("Cartesian Integrand:", value="x^2 + y^2")
-        
-        if st.button("Apply Transformation"):
-            j_eng = MultivariableEngine(jac_expr, "x, y, z" if "3D" in system else "x, y")
-            if system == "Polar (2D)": trans = get_polar_transformation()
-            elif system == "Cylindrical (3D)": trans = get_cylindrical_transformation()
-            else: trans = get_spherical_transformation()
+        try:
+            f_eng = VectorFieldEngine([P_x, Q_x, R_x])
+            div = compute_divergence(f_eng)
+            curl = compute_curl(f_eng)
             
-            j_res = apply_coordinate_transformation(j_eng.expression, trans)
+            st.write(f"- **Divergence $\\nabla \cdot F$:** `{div}`")
+            st.write(f"- **Curl $\\nabla \\times F$:** `{curl}`")
             
-            st.write(f"- **Substitution Map:** `{j_res['Substitutions']}`")
-            st.write(f"- **Transformed $f(u,v)$:** `{j_res['f(u,v)']}`")
-            st.latex(r"\text{Jacobian Determinant } J = " + sp.latex(j_res['Jacobian Determinant (J)']))
-            st.latex(r"\text{Absolute Jacobian Factor } |J| = " + sp.latex(j_res['Absolute Jacobian Factor |J|']))
-            st.latex(r"\text{Final Integrand } f \cdot |J| = " + sp.latex(j_res['Final Integrand f(u,v)|J|']))
+            if div == 0: st.info("Field is Incompressible (Divergence = 0)")
+            if curl == [0, 0, 0]: st.info("Field is Irrotational/Conservative (Curl = 0). Note: Depends on simply connected domain.")
+            
+            st.subheader("Scalar Laplacian $\\nabla^2 f$")
+            scalar_f = st.text_input("Scalar f(x,y,z):", "x^2 + y^2 + z^2")
+            st.write(f"**Laplacian:** `{compute_scalar_laplacian(scalar_f)}`")
+            
+            st.pyplot(plot_2d_vector_field(P_x, Q_x, (-3, 3), (-3, 3)))
+        except Exception as e:
+            st.error(str(e))
 
     with tabs[2]:
-        st.header("Physical Applications: Laminas")
-        st.markdown("Calculates Mass, Centroid, and Moments of Inertia for a 2D plate with variable density $\\rho(x,y)$.")
-        
-        rho_input = st.text_input("Density $\\rho(x,y)$:", value="x + y")
-        if st.button("Compute Lamina Properties"):
-            lam_res = compute_lamina_properties(rho_input, x_bnds, y_bnds)
-            if lam_res["Status"] == "Success":
-                st.write(f"- **Mass (M):** `{lam_res['Mass (M)']}`")
-                st.write(f"- **Centroid $(\\bar{x}, \\bar{y})$:** `{lam_res['Centroid (x_bar, y_bar)']}`")
-                st.write(f"- **Moments ($M_x, M_y$):** `{lam_res['Moment M_x']}, {lam_res['Moment M_y']}`")
-                st.write(f"- **Moments of Inertia ($I_x, I_y, I_0$):** `{lam_res['Inertia I_x']}, {lam_res['Inertia I_y']}, {lam_res['Polar Inertia I_0']}`")
-            else:
-                st.error(lam_res["Error"])
+        st.header("Vector Line Integrals & Work")
+        st.markdown(r"$W = \int_C F \cdot dr$")
+        if st.button("Compute Work using Curve $r(t)$ and Field $F$"):
+            w_res = vector_line_integral(f_eng, r_eng, t_start, t_end)
+            st.write(f"- **Integrand $F \cdot dr$:** `{w_res.get('Integrand (F·dr)')}`")
+            st.write(f"- **Work Exact:** `{w_res.get('Exact')}`")
+            st.write(f"- **Work Numerical:** `{w_res.get('Numerical')}`")
 
     with tabs[3]:
-        st.header("Monte Carlo Integration & Convergence")
-        st.markdown(r"Estimates $\iint_D f(x,y) dA$ via random uniform sampling. Expected to converge at rate $O(1/\sqrt{N})$.")
+        st.header("Surface Integrals & Flux")
+        st.markdown(r"$\Phi = \iint_S F \cdot n \, dS$")
+        s1, s2, s3 = st.columns(3)
+        with s1: ru = st.text_input("x(u,v):", "u")
+        with s2: rv = st.text_input("y(u,v):", "v")
+        with s3: rw = st.text_input("z(u,v):", "u^2 + v^2")
         
-        mc_n = st.selectbox("Sample Count ($N$):", [1000, 10000, 100000, 1000000], index=1)
+        b1, b2 = st.columns(2)
+        with b1: u_bounds = st.text_input("u bounds (start, end):", "0, 1")
+        with b2: v_bounds = st.text_input("v bounds (start, end):", "0, 1")
         
-        if st.button("Run Monte Carlo Estimate"):
-            mc_res = monte_carlo_double_integral(m_eng, x_bnds, y_bnds, N=mc_n)
-            exact_val = compute_double_integral(m_eng, x_bnds, y_bnds)["Numerical Result"]
+        if st.button("Compute Flux"):
+            ub = tuple(float(x) for x in u_bounds.split(','))
+            vb = tuple(float(x) for x in v_bounds.split(','))
+            flux_res = compute_flux(f_eng, [ru, rv, rw], "u, v", ub, vb)
+            st.write(f"- **Normal Vector $n$:** `{flux_res.get('Normal (n)')}`")
+            st.write(f"- **Exact Flux:** `{flux_res.get('Exact Flux')}`")
+            st.write(f"- **Numerical Flux:** `{flux_res.get('Numerical')}`")
+
+    with tabs[4]:
+        st.header("Fundamental Theorems of Vector Calculus")
+        st.markdown("Computationally verify major theorems over basic standard domains (e.g., box domains).")
+        
+        t_col1, t_col2 = st.columns(2)
+        with t_col1:
+            st.subheader("Green's Theorem")
+            st.markdown(r"$\oint_C P dx + Q dy = \iint_D \left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}\right) dA$")
+            g_res = verify_greens_theorem(f_eng, (0, 1), (0, 1))
+            st.write(f"- **Curl / Integrand:** `{g_res['Curl (Q_x - P_y)']}`")
+            st.write(f"- **RHS Area Evaluation:** `{g_res['RHS (Area Integral)']}`")
             
-            st.metric("Monte Carlo Estimate", f"{mc_res['Estimate']:.5f}", delta=f"Error: {abs(mc_res['Estimate'] - exact_val):.5f}")
-            st.write(f"- **Statistical Uncertainty ($\pm 1\sigma$):** `{mc_res['Statistical Uncertainty']}`")
-            
-            st.pyplot(plot_monte_carlo_samples(m_eng, x_bnds, y_bnds, mc_res))
-            
-            st.divider()
-            st.subheader("Law of Large Numbers: Convergence Study")
-            study = monte_carlo_convergence_study(m_eng, x_bnds, y_bnds, exact_val)
-            st.dataframe(pd.DataFrame(study), use_container_width=True)
-            st.info("Notice how absolute error decreases slowly as N increases by powers of 10.")
+        with t_col2:
+            st.subheader("Divergence Theorem")
+            st.markdown(r"$\oiint_S F \cdot n \, dS = \iiint_V \nabla \cdot F \, dV$")
+            d_res = verify_divergence_theorem(f_eng, (0, 1), (0, 1), (0, 1))
+            st.write(f"- **Divergence:** `{d_res['Divergence (∇·F)']}`")
+            st.write(f"- **RHS Volume Evaluation:** `{d_res['RHS (Volume Integral)']}`")
