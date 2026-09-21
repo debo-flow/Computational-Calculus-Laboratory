@@ -1,129 +1,139 @@
-# ... [Keep Milestones 1 to 12 unchanged] ...
+# ... [Keep Milestones 1 to 13 unchanged] ...
 
-elif page == "Milestone 13: Vector Calculus":
-    st.title("Advanced Vector Calculus Laboratory")
-    st.markdown("Analyze parametric curves, vector fields, operators, and fundamental theorems.")
+elif page == "Milestone 14: Differential Equations":
+    st.title("Advanced Differential Equations & Dynamical Systems")
+    st.markdown("Solve Initial Value Problems, compare Numerical Steppers, and classify Nonlinear Phase Spaces.")
 
-    from calculus.vector_calculus.vector_engine import VectorFunctionEngine
-    from calculus.vector_calculus.vector_fields import VectorFieldEngine
-    from calculus.vector_calculus.vector_functions import compute_kinematics, compute_arc_length
-    from calculus.vector_calculus.curvature import compute_curvature_and_tangent
-    from calculus.vector_calculus.divergence import compute_divergence
-    from calculus.vector_calculus.curl import compute_curl
-    from calculus.vector_calculus.laplacian import compute_scalar_laplacian
-    from calculus.vector_calculus.line_integrals import vector_line_integral
-    from calculus.vector_calculus.flux import compute_flux
-    from calculus.vector_calculus.theorems import verify_greens_theorem, verify_divergence_theorem
-    from visualization.vector_calculus_plots import plot_2d_vector_field, plot_parametric_curve_3d
+    from calculus.differential_equations.ode_analysis import classify_single_ode
+    from calculus.differential_equations.symbolic_solutions import solve_symbolic_ode
+    from calculus.differential_equations.systems import create_numerical_system, convert_second_order_to_system
+    from calculus.differential_equations.equilibrium import find_equilibria
+    from calculus.differential_equations.stability import analyze_stability
+    from numerical.ode.rk4 import solve_fixed_step
+    from numerical.ode.adaptive import solve_adaptive_rk45
+    from visualization.ode_plots import plot_slope_field, plot_phase_portrait, plot_solution_comparison
 
     tabs = st.tabs([
-        "Parametric Curves & Kinematics", 
-        "Vector Fields (Div, Curl, Laplacian)", 
-        "Line Integrals & Work", 
-        "Surface Integrals & Flux", 
-        "Vector Theorems"
+        "Symbolic ODEs & IVPs", 
+        "Numerical Solvers & Error", 
+        "Systems & Phase Space", 
+        "Equilibrium & Stability",
+        "Physics Examples"
     ])
 
     with tabs[0]:
-        st.header("Parametric Curves $r(t) = \\langle x(t), y(t), z(t) \\rangle$")
-        c1, c2, c3 = st.columns(3)
-        with c1: x_t = st.text_input("x(t):", "cos(t)")
-        with c2: y_t = st.text_input("y(t):", "sin(t)")
-        with c3: z_t = st.text_input("z(t):", "t")
-
-        try:
-            r_eng = VectorFunctionEngine([x_t, y_t, z_t])
-            kin = compute_kinematics(r_eng)
-            curv = compute_curvature_and_tangent(r_eng)
+        st.header("Symbolic ODE Analysis & Initial Value Problems")
+        st.info("Format: use `y'` for first derivative, `y''` for second. E.g., `y'' + 4*y = 0`")
+        
+        c1, c2 = st.columns(2)
+        with c1: eq_input = st.text_input("Differential Equation:", "y' + 2*x*y = x")
+        with c2: ivp_input = st.text_input("Initial Conditions (e.g. y(0)=1, y'(0)=0):", "y(0)=1")
+        
+        if st.button("Solve Symbolically"):
+            class_res = classify_single_ode(eq_input)
+            st.write(f"**Order:** `{class_res.get('Order')}` | **Autonomous:** `{class_res.get('Is Autonomous')}`")
             
-            st.latex(r"r(t) = \langle " + sp.latex(r_eng.components[0]) + ", " + sp.latex(r_eng.components[1]) + ", " + sp.latex(r_eng.components[2]) + r"\rangle")
-            st.write(f"- **Velocity $v(t)$:** `{kin['Velocity (v)']}`")
-            st.write(f"- **Acceleration $a(t)$:** `{kin['Acceleration (a)']}`")
-            st.write(f"- **Speed $\vert{}v(t)\vert{}$:** `{kin['Speed (|v|)']}`")
-            st.write(f"- **Unit Tangent $T(t)$:** `{curv['Unit Tangent (T)']}`")
-            st.write(f"- **Curvature $\kappa(t)$:** `{curv['Curvature (kappa)']}`")
-            
-            st.subheader("Arc Length $L = \int \vert{}r'(t)\vert{} dt$")
-            l1, l2 = st.columns(2)
-            with l1: t_start = st.number_input("t start:", value=0.0)
-            with l2: t_end = st.number_input("t end:", value=6.28318)
-            l_res = compute_arc_length(r_eng, t_start, t_end)
-            st.write(f"**Arc Length Exact:** `{l_res.get('Integral')}` | **Numerical:** `{l_res.get('Numerical')}`")
-            
-            st.pyplot(plot_parametric_curve_3d(x_t, y_t, z_t, (t_start, t_end)))
-        except Exception as e:
-            st.error(str(e))
+            # Parse IVP
+            ivp_dict = {}
+            if ivp_input.strip():
+                for cond in ivp_input.split(','):
+                    k, v = cond.split('=')
+                    ivp_dict[k.strip()] = float(v.strip())
+                    
+            sol_res = solve_symbolic_ode(eq_input, ivp=ivp_dict)
+            if sol_res["Status"] == "Success":
+                st.success("✅ Analytical Solution Found & Verified")
+                st.latex(sp.latex(sol_res["General/Particular Solution"]))
+            else:
+                st.error(sol_res["Error"])
+                
+        st.divider()
+        st.subheader("Slope/Direction Field")
+        sf_eq = st.text_input("dy/dx = f(x,y):", "x - y")
+        st.pyplot(plot_slope_field(sf_eq, (-3, 3), (-3, 3)))
 
     with tabs[1]:
-        st.header("Vector Fields $F(x,y,z) = \\langle P, Q, R \\rangle$")
-        v1, v2, v3 = st.columns(3)
-        with v1: P_x = st.text_input("P(x,y,z):", "-y")
-        with v2: Q_x = st.text_input("Q(x,y,z):", "x")
-        with v3: R_x = st.text_input("R(x,y,z):", "0")
+        st.header("Numerical Solvers & Error Analysis")
+        n1, n2, n3 = st.columns(3)
+        with n1: n_eq = st.text_input("y' = f(t,y):", "-y + sin(t)", key="neq")
+        with n2: t_end = st.number_input("End Time (t_end):", value=10.0)
+        with n3: h_step = st.number_input("Step Size (h):", value=0.5)
         
-        try:
-            f_eng = VectorFieldEngine([P_x, Q_x, R_x])
-            div = compute_divergence(f_eng)
-            curl = compute_curl(f_eng)
+        f_num = create_numerical_system([n_eq], "y")
+        def f_wrapper(t, y): return f_num(t, y)[0]
+        
+        y0 = np.array([1.0])
+        
+        methods = ['Euler', 'Heun', 'Midpoint', 'RK4']
+        results = {}
+        for m in methods:
+            t_vals, y_vals, stat = solve_fixed_step(f_wrapper, 0.0, y0, t_end, h_step, method=m)
+            if stat == "SUCCESS": results[m] = y_vals
             
-            st.write(f"- **Divergence $\\nabla \cdot F$:** `{div}`")
-            st.write(f"- **Curl $\\nabla \\times F$:** `{curl}`")
-            
-            if div == 0: st.info("Field is Incompressible (Divergence = 0)")
-            if curl == [0, 0, 0]: st.info("Field is Irrotational/Conservative (Curl = 0). Note: Depends on simply connected domain.")
-            
-            st.subheader("Scalar Laplacian $\\nabla^2 f$")
-            scalar_f = st.text_input("Scalar f(x,y,z):", "x^2 + y^2 + z^2")
-            st.write(f"**Laplacian:** `{compute_scalar_laplacian(scalar_f)}`")
-            
-            st.pyplot(plot_2d_vector_field(P_x, Q_x, (-3, 3), (-3, 3)))
-        except Exception as e:
-            st.error(str(e))
+        t_ad, y_ad, stat_ad = solve_adaptive_rk45(f_wrapper, 0.0, y0, t_end)
+        if stat_ad == "SUCCESS": results['Adaptive RK45'] = y_ad
+        
+        st.pyplot(plot_solution_comparison(t_vals, results))
+        
+        st.info("Notice how the Euler method accumulates severe local truncation error compared to RK4 or Adaptive RK45 at large step sizes.")
 
     with tabs[2]:
-        st.header("Vector Line Integrals & Work")
-        st.markdown(r"$W = \int_C F \cdot dr$")
-        if st.button("Compute Work using Curve $r(t)$ and Field $F$"):
-            w_res = vector_line_integral(f_eng, r_eng, t_start, t_end)
-            st.write(f"- **Integrand $F \cdot dr$:** `{w_res.get('Integrand (F·dr)')}`")
-            st.write(f"- **Work Exact:** `{w_res.get('Exact')}`")
-            st.write(f"- **Work Numerical:** `{w_res.get('Numerical')}`")
+        st.header("Dynamical Systems & Phase Portraits")
+        st.markdown("Analyze systems $\\frac{dx}{dt} = f(x,y)$ and $\\frac{dy}{dt} = g(x,y)$.")
+        
+        s1, s2 = st.columns(2)
+        with s1: dx_dt = st.text_input("dx/dt = f(x,y):", "y")
+        with s2: dy_dt = st.text_input("dy/dt = g(x,y):", "-sin(x) - 0.5*y") # Damped Pendulum
+        
+        st.pyplot(plot_phase_portrait([dx_dt, dy_dt], "x, y", (-10, 10), (-5, 5)))
+        
+        st.divider()
+        st.subheader("Higher-Order Conversion")
+        ho_eq = st.text_input("Convert y'' = f(x,y,y') into First-Order System:", "-sin(y) - 0.5*y'")
+        sys_conv = convert_second_order_to_system(ho_eq)
+        st.latex(r"u_1' = " + sp.latex(sys_conv["u1'"]))
+        st.latex(r"u_2' = " + sp.latex(sys_conv["u2'"]))
 
     with tabs[3]:
-        st.header("Surface Integrals & Flux")
-        st.markdown(r"$\Phi = \iint_S F \cdot n \, dS$")
-        s1, s2, s3 = st.columns(3)
-        with s1: ru = st.text_input("x(u,v):", "u")
-        with s2: rv = st.text_input("y(u,v):", "v")
-        with s3: rw = st.text_input("z(u,v):", "u^2 + v^2")
+        st.header("Equilibrium & Stability Analysis")
+        st.markdown("Locates critical points where $\\frac{dx}{dt} = \\frac{dy}{dt} = 0$, computes the Jacobian Matrix, and classifies stability via eigenvalues.")
         
-        b1, b2 = st.columns(2)
-        with b1: u_bounds = st.text_input("u bounds (start, end):", "0, 1")
-        with b2: v_bounds = st.text_input("v bounds (start, end):", "0, 1")
+        eqs = [dx_dt, dy_dt]
+        eq_points = find_equilibria(eqs, "x, y")
         
-        if st.button("Compute Flux"):
-            ub = tuple(float(x) for x in u_bounds.split(','))
-            vb = tuple(float(x) for x in v_bounds.split(','))
-            flux_res = compute_flux(f_eng, [ru, rv, rw], "u, v", ub, vb)
-            st.write(f"- **Normal Vector $n$:** `{flux_res.get('Normal (n)')}`")
-            st.write(f"- **Exact Flux:** `{flux_res.get('Exact Flux')}`")
-            st.write(f"- **Numerical Flux:** `{flux_res.get('Numerical')}`")
+        if eq_points:
+            for pt in eq_points:
+                st.subheader(f"Equilibrium Candidate: `{pt}`")
+                stab = analyze_stability(eqs, "x, y", pt)
+                
+                c3, c4 = st.columns(2)
+                with c3:
+                    st.write(f"- **Classification:** `{stab.get('Classification')}`")
+                    st.write(f"- **Eigenvalues ($\lambda$):** `{stab.get('Eigenvalues')}`")
+                with c4:
+                    if "Jacobian (J)" in stab:
+                        st.markdown("**Linearized Jacobian evaluated at point:**")
+                        st.latex(sp.latex(sp.Matrix(stab['Evaluated J'])))
+        else:
+            st.warning("No real equilibrium points found or system too complex for exact symbolic roots.")
 
     with tabs[4]:
-        st.header("Fundamental Theorems of Vector Calculus")
-        st.markdown("Computationally verify major theorems over basic standard domains (e.g., box domains).")
+        st.header("Built-in Physics & Mathematical Systems")
+        st.markdown("""
+        Try inputting these famous dynamical systems into the Phase Space tab:
         
-        t_col1, t_col2 = st.columns(2)
-        with t_col1:
-            st.subheader("Green's Theorem")
-            st.markdown(r"$\oint_C P dx + Q dy = \iint_D \left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}\right) dA$")
-            g_res = verify_greens_theorem(f_eng, (0, 1), (0, 1))
-            st.write(f"- **Curl / Integrand:** `{g_res['Curl (Q_x - P_y)']}`")
-            st.write(f"- **RHS Area Evaluation:** `{g_res['RHS (Area Integral)']}`")
-            
-        with t_col2:
-            st.subheader("Divergence Theorem")
-            st.markdown(r"$\oiint_S F \cdot n \, dS = \iiint_V \nabla \cdot F \, dV$")
-            d_res = verify_divergence_theorem(f_eng, (0, 1), (0, 1), (0, 1))
-            st.write(f"- **Divergence:** `{d_res['Divergence (∇·F)']}`")
-            st.write(f"- **RHS Volume Evaluation:** `{d_res['RHS (Volume Integral)']}`")
+        **1. Lotka-Volterra (Predator-Prey)**
+        * $dx/dt = x - xy$
+        * $dy/dt = xy - y$
+        * *Equilibria:* Saddle at $(0,0)$, Center at $(1,1)$.
+        
+        **2. Simple Harmonic Oscillator**
+        * $dx/dt = y$
+        * $dy/dt = -x$
+        * *Stability:* Pure imaginary eigenvalues (Center).
+        
+        **3. Van der Pol Oscillator (Non-linear damping)**
+        * $dx/dt = y$
+        * $dy/dt = (1 - x^2)y - x$
+        * *Feature:* Exhibits a stable limit cycle.
+        """)
