@@ -1,28 +1,28 @@
 # Computational Calculus Laboratory
 
-**Milestone 13 — Advanced Vector Calculus Laboratory**
+**Milestone 14 — Advanced Differential Equations & Dynamical Systems**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 13 introduces the **Advanced Vector Calculus Laboratory**. This update elevates the system to handle the full scope of classical 3D kinematics, differential operators (Gradient, Divergence, Curl, Laplacian), and the great integral theorems of vector calculus (Green's, Stokes', Divergence).
+Milestone 14 introduces the **Advanced Differential Equations & Dynamical Systems Laboratory**. It unites numerical integration, symbolic limits, and multivariable linear algebra to strictly classify, evaluate, and visualize linear and nonlinear Ordinary Differential Equations (ODEs) and N-dimensional Phase Spaces.
 
 ## Features Implemented
 
-### Milestone 13: Vector Calculus
-* **Vector-Valued Functions $r(t)$:** Kinematic analysis computing Velocity, Acceleration, Speed, Unit Tangents, Curvature ($\kappa$), and exact Arc Lengths.
-* **Vector Fields $F(x,y,z)$:** Evaluation and Quiver-plot visualization of 2D/3D fields.
-* **Differential Operators:** Computes Divergence ($\nabla \cdot F$), Curl ($\nabla \times F$), and the scalar Laplacian ($\nabla^2 f$). Identifies Irrotational (Conservative) and Incompressible fields.
-* **Vector Line Integrals & Work:** Exact and numerical evaluation of $\int_C F \cdot dr$ along user-defined parametric trajectories.
-* **Surface Integrals & Flux:** Parameterizes surfaces $r(u,v)$, computes the normal vector $r_u \times r_v$, and evaluates total Flux $\iint_S F \cdot n dS$.
-* **Theorems of Vector Calculus:** Computational verification engines testing Green's Theorem and the Divergence Theorem directly against vector definitions over constrained geometries.
+### Milestone 14: Differential Equations
+* **Symbolic ODE Analysis:** Identifies Order, Linearity, and Autonomy. Computes exact analytical solutions (General and IVP) using SymPy, independently verifying results via residual elimination ($LHS - RHS = 0$).
+* **Numerical Fixed-Step Solvers:** Educational side-by-side implementation of Euler, Heun, Midpoint, and classic Runge-Kutta (RK4) methods.
+* **Adaptive Integration:** Industrial-grade adaptive RK45 (Fehlberg/Dormand-Prince) engine via SciPy integration.
+* **Phase Space & Dynamical Systems:** Converts arbitrary higher-order ODEs to first-order systems. Maps Direction/Slope fields and Phase Portraits with Streamline tracking.
+* **Equilibrium & Stability:** Symbolically hunts for autonomous equilibrium roots ($f(X)=0$). Computes the evaluated Jacobian ($J$), extracts Eigenvalues, and strictly classifies linearized 2D stability (Nodes, Saddles, Foci, Centers).
 
 ### Earlier Milestones (Preserved)
+* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Green/Stokes Theorems).
 * **M12:** Multiple Integrals (Iterated, Monte Carlo, Jacobians, Laminas).
 * **M11:** Multivariable Calculus (Gradients, Jacobians, Hessian).
 * **M10:** Advanced Taylor & Maclaurin Series (Polynomials, Error Bounds).
 * **M9:** Advanced Sequences & Infinite Series.
-* **M8:** Advanced Numerical Integration (Quadrature, Adaptive).
+* **M8:** Advanced Numerical Integration.
 * **M7:** Advanced Integral Calculus (Symbolic $+C$, FTC).
 * **M6:** Advanced Numerical Differentiation.
 * **M5:** Applications of Differential Calculus.
@@ -33,7 +33,7 @@ Milestone 13 introduces the **Advanced Vector Calculus Laboratory**. This update
 
 ## Technology Stack
 * Python 3.9+
-* Mathematics: SymPy, NumPy
+* Mathematics: SymPy, NumPy, SciPy
 * Visualization: Matplotlib
 * UI Framework: Streamlit
 * Testing: Pytest
