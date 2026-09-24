@@ -1,53 +1,47 @@
 import sympy as sp
 import numpy as np
-from typing import Dict, Any, List, Callable
-from .numerical_solver import solve_fixed_step
+from typing import Dict, List, Callable
 
 def classify_ode(eq_str: str, func_name: str = 'y', var_name: str = 'x') -> dict:
-    """Classifies symbolic ODEs strictly returning known types."""
+    """Rigorous symbolic classification of an ODE."""
     x = sp.Symbol(var_name, real=True)
     y = sp.Function(func_name)(x)
     
-    eq_parts = eq_str.split('=')
-    lhs, rhs = sp.sympify(eq_parts[0]), sp.sympify(eq_parts[1]) if len(eq_parts) > 1 else sp.S.Zero
-    ode_expr = sp.simplify(lhs - rhs)
+    lhs, rhs = eq_str.split('=') if '=' in eq_str else (eq_str, "0")
+    ode_expr = sp.simplify(sp.sympify(lhs) - sp.sympify(rhs))
     
     try:
-        classifications = sp.classify_ode(sp.Eq(ode_expr, 0), y)
+        hints = sp.classify_ode(sp.Eq(ode_expr, 0), y)
         order = sp.ode_order(ode_expr, y)
-        is_linear = any("linear" in str(c).lower() for c in classifications)
-        is_homo = any("homogeneous" in str(c).lower() for c in classifications)
+        hints_str = [str(h) for h in hints]
+        
+        is_linear = any("linear" in h.lower() for h in hints_str)
+        is_homo = any("homogeneous" in h.lower() for h in hints_str)
+        is_exact = any("exact" in h.lower() for h in hints_str)
+        is_bernoulli = any("bernoulli" in h.lower() for h in hints_str)
+        is_separable = any("separable" in h.lower() for h in hints_str)
         
         return {
             "Order": order,
             "Linearity": "Linear" if is_linear else "Nonlinear",
             "Homogeneity": "Homogeneous" if is_homo else "Non-homogeneous",
             "Autonomous": "Autonomous" if not ode_expr.has(x) else "Non-autonomous",
-            "Supported Methods": classifications
+            "Exact": is_exact,
+            "Separable": is_separable,
+            "Bernoulli": is_bernoulli,
+            "Supported Methods": hints_str
         }
     except Exception as e:
-        return {"Error": str(e)}
+        return {"Error": f"Classification inconclusive: {str(e)}"}
 
-def compute_error_metrics(y_exact: np.ndarray, y_num: np.ndarray) -> Dict[str, float]:
-    """Computes global error bounds for ODE solvers."""
-    abs_errors = np.abs(y_exact - y_num)
-    with np.errstate(divide='ignore', invalid='ignore'):
-        rel_errors = np.where(np.abs(y_exact) > 1e-12, abs_errors / np.abs(y_exact), 0)
-        
-    return {
-        "Max Absolute Error": float(np.max(abs_errors)),
-        "Max Relative Error": float(np.max(rel_errors)),
-        "RMS Error": float(np.sqrt(np.mean(abs_errors**2)))
-    }
-
-def step_size_convergence_study(f: Callable, exact_func: Callable, x0: float, y0: np.ndarray, x_end: float, base_h: float, method: str) -> List[Dict]:
-    """Evaluates empirical convergence order p ~ log(E1/E2) / log(h1/h2)."""
+def empirical_convergence_study(f: Callable, exact_func: Callable, x0: float, y0: np.ndarray, x_end: float, base_h: float, solver_func) -> List[Dict]:
+    """Estimates empirical convergence order p ~ log(E1/E2) / log(h1/h2)."""
     h_vals = [base_h, base_h/2.0, base_h/4.0, base_h/8.0]
     results = []
     prev_err, prev_h = None, None
     
     for h in h_vals:
-        x_num, y_num, stat = solve_fixed_step(f, x0, y0, x_end, h, method)
+        x_num, y_num, stat = solver_func(f, x0, y0, x_end, h)
         if stat != "SUCCESS": continue
             
         exact_y = np.array([exact_func(xi) for xi in x_num])
@@ -60,7 +54,7 @@ def step_size_convergence_study(f: Callable, exact_func: Callable, x0: float, y0
         results.append({
             "Step Size (h)": h,
             "Max Absolute Error": max_err,
-            "Experimental Order (p)": p_est
+            "Observed Order (p)": p_est
         })
         prev_err, prev_h = max_err, h
         
