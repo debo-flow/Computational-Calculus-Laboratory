@@ -1,23 +1,23 @@
 # Computational Calculus Laboratory
 
-**Milestone 18 — Advanced Differential Equations & Dynamical Systems Laboratory**
+**Milestone 19 — Advanced Differential Equations & Dynamical Systems Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 18 completes the **Dynamical Systems Laboratory**. It unites numerical integration, symbolic classification, and multivariable linear algebra to rigorously analyze ODEs. It heavily focuses on empirical error bounds ($p \approx \log(E_1/E_2)/\log(h_1/h_2)$), multidimensional nullcline mapping, and robust adaptive vs. fixed-step (Euler to RK4) numerical benchmarks.
+Milestone 19 refines and finalizes the **Dynamical Systems Laboratory**. It implements meticulous symbolic parsing for First-Order differential equations (Separable, Exact, Linear, Bernoulli) verifying all analytical solutions through exact residual substitution. It strictly integrates $N$-dimensional autonomous vector fields, tracking invariant nullclines, topological phase limits, and empirical $p$-order numerical convergence testing.
 
 ## Features Implemented
 
-### Milestone 18: Differential Equations & Dynamical Systems
-* **ODE Classification & Exact Solvers:** Symbolically parses Linearity, Homogeneity, and Autonomy. Computes exact analytical solutions (General and IVP) using SymPy, independently verifying results via residual elimination ($LHS - RHS = 0$).
-* **Empirical Convergence Benchmarking:** Systematically halves step size $h$ iteratively to experimentally prove the theoretical convergence limits of Explicit Euler $O(h)$, Heun/Midpoint $O(h^2)$, RK3 $O(h^3)$, and RK4 $O(h^4)$.
-* **Dynamical Phase Spaces:** Maps interactive vector fields overlaid with computed $f(x,y)=0$ and $g(x,y)=0$ Nullclines to visually anchor equilibrium candidates and trajectories.
-* **Equilibrium & Stability:** Symbolically hunts for autonomous equilibrium roots ($f(X)=0$). Computes the evaluating Jacobian ($J$), extracts Eigenvalues, and strictly classifies linearized 2D stability (Nodes, Saddles, Foci, Centers).
-* **Stiffness Foundations:** Introduces implicit integration frameworks (BDF via SciPy) allowing the stable resolution of multi-timescale stiff ODEs where explicit methods (RK45) catastrophically stall.
+### Milestone 19: Differential Equations Finalization
+* **Explicit First-Order Parsing:** Automatically routes and solves Bernoulli substitutions ($v = y^{1-n}$), Linear Integrating Factors ($\mu(x) = e^{\int P dx}$), and Exact Potential Functions ($F(x,y)=C$). 
+* **Convergence Verification Benchmarks:** Implements empirical stepwise convergence loops evaluating $p \approx \log(E_1/E_2)/\log(h_1/h_2)$ against exact integration bounds across Euler, Heun, Midpoint, and RK4 steppers.
+* **Topological Phase Space:** Extracts symbolic $f(x,y)=0$ and $g(x,y)=0$ Nullclines overlaid across normalized direction/streamline vector fields to map global dynamical flow.
+* **Equilibrium & Linearized Stability:** Computes the Jacobian matrix $\partial F / \partial X$ at $F(X)=0$, extracting Eigenvalues to decisively classify local geometric stability (Saddles, Nodes, Foci, Centers).
+* **Classical Parameter Explorer:** Interactive sandbox for famous biological/physical dynamical limits (Lotka-Volterra Predator-Prey, Damped/Harmonic Oscillators, Logistic Growth).
 
 ### Earlier Milestones (Preserved)
-* **M17/16/15/14:** Foundational ODEs, BVPs, Chaos Sensitivity, and Energy Conservation.
+* **M18-M14:** Advanced BVPs/IVPs, Shooting Methods, Bifurcation/Sensitivity, Stiff ODE frameworks.
 * **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Green/Stokes Theorems).
 * **M12:** Multiple Integrals (Iterated, Monte Carlo, Jacobians, Laminas).
 * **M11:** Multivariable Calculus (Gradients, Jacobians, Hessian).
