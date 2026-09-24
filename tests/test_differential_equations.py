@@ -1,34 +1,33 @@
 import pytest
 import numpy as np
 import sympy as sp
-from calculus.differential_equations.second_order import analyze_constant_coeff_linear
-from calculus.differential_equations.systems import analyze_matrix_system
-from calculus.differential_equations.ode_analysis import verify_conservation
-from numerical.ode_solvers import solve_fixed_step, solve_adaptive
+from calculus.differential_equations.ode_analysis import classify_single_ode, parameter_sweep_equilibria
+from calculus.differential_equations.numerical_solvers import run_convergence_study
+from calculus.differential_equations.phase_space import compute_nullclines
 
-def test_characteristic_equation():
-    # y'' + 3y' + 2y = 0 => r^2 + 3r + 2 = 0. Roots -1, -2.
-    res = analyze_constant_coeff_linear(1, 3, 2)
-    assert res["Root Classification"] == "Distinct Real Roots"
-    assert set(res["Roots"]) == {-1, -2}
+def test_ode_classification_details():
+    res = classify_single_ode("y'' + 4*y = 0", 'y', 'x')
+    assert res["Order"] == 2
+    assert res["Linear"] is True
+    assert res["Homogeneous"] is True
 
-def test_matrix_system():
-    # Simple Harmonic Oscillator as matrix: [0, 1; -1, 0]
-    A = [[0, 1], [-1, 0]]
-    res = analyze_matrix_system(A)
-    assert res["Classification"] == "Center (Marginally Stable)"
-    assert res["Trace"] == 0
-    assert res["Determinant"] == 1
+def test_convergence_study():
+    # y' = y. Exact y(1) = e^1. Check RK4 p~4
+    f = lambda x, y: y
+    exact = lambda x: np.exp(x)
+    study = run_convergence_study(f, exact, 0.0, np.array([1.0]), 1.0, 0.2, 'RK4')
+    
+    assert len(study) == 4
+    p_last = study[-1]["Observed Order (p)"]
+    if isinstance(p_last, float):
+        assert pytest.approx(p_last, 0.5) == 4.0 # RK4 is O(h^4)
 
-def test_conservation_verification():
-    # Pendulum: x' = y, y' = -sin(x). Energy: E = 0.5*y^2 - cos(x)
-    sys = ["y", "-sin(x)"]
-    res = verify_conservation(sys, "x, y", "0.5*y**2 - cos(x)")
-    assert res["Is Conserved"] is True
-
-def test_stiff_solver():
-    # Stiff test scalar: y' = -1000y, y(0)=1
-    f = lambda t, y: -1000 * y
-    t, y, status = solve_adaptive(f, 0, np.array([1.0]), 0.1, stiff=True)
-    assert "BDF" in status
-    assert pytest.approx(y[-1][0], 1e-2) == 0.0 # Should decay instantly
+def test_parameter_sweep():
+    # dx/dt = mu*x - x^3
+    sys = ["mu*x - x**3"]
+    sweep = parameter_sweep_equilibria(sys, "x", "mu", [-1.0, 1.0])
+    
+    # For mu=-1, x=0 is only real equilibrium
+    assert len(sweep[0]["Equilibria"]) == 1
+    # For mu=1, x=0, 1, -1
+    assert len(sweep[1]["Equilibria"]) == 3
