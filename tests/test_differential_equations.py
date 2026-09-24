@@ -1,33 +1,48 @@
 import pytest
 import numpy as np
 import sympy as sp
-from calculus.differential_equations.ode_analysis import classify_single_ode, parameter_sweep_equilibria
-from calculus.differential_equations.numerical_solvers import run_convergence_study
-from calculus.differential_equations.phase_space import compute_nullclines
+from calculus.differential_equations.ode_analysis import classify_ode, compute_error_metrics, step_size_convergence_study
+from calculus.differential_equations.numerical_solver import solve_fixed_step, solve_adaptive
+from calculus.differential_equations.systems import create_numerical_system
+from calculus.differential_equations.equilibrium import find_equilibria
+from calculus.differential_equations.stability import analyze_stability
 
-def test_ode_classification_details():
-    res = classify_single_ode("y'' + 4*y = 0", 'y', 'x')
+def test_ode_classification():
+    res = classify_ode("y'' + 4*y = 0", 'y', 'x')
     assert res["Order"] == 2
-    assert res["Linear"] is True
-    assert res["Homogeneous"] is True
+    assert res["Linearity"] == "Linear"
+    assert res["Homogeneity"] == "Homogeneous"
+    assert res["Autonomous"] == "Autonomous"
 
-def test_convergence_study():
-    # y' = y. Exact y(1) = e^1. Check RK4 p~4
+def test_numerical_rk3_rk4():
+    # y' = y. Exact y(1) = e
+    f = lambda x, y: y
+    x, y3, s3 = solve_fixed_step(f, 0, np.array([1.0]), 1.0, 0.1, 'RK3')
+    x, y4, s4 = solve_fixed_step(f, 0, np.array([1.0]), 1.0, 0.1, 'RK4')
+    
+    assert s3 == "SUCCESS" and s4 == "SUCCESS"
+    assert abs(y4[-1][0] - np.exp(1)) < abs(y3[-1][0] - np.exp(1)) # RK4 more accurate than RK3
+
+def test_convergence_order():
     f = lambda x, y: y
     exact = lambda x: np.exp(x)
-    study = run_convergence_study(f, exact, 0.0, np.array([1.0]), 1.0, 0.2, 'RK4')
-    
-    assert len(study) == 4
-    p_last = study[-1]["Observed Order (p)"]
+    # Midpoint should be O(h^2)
+    study = step_size_convergence_study(f, exact, 0.0, np.array([1.0]), 1.0, 0.2, 'RK2 (Midpoint)')
+    p_last = study[-1]["Experimental Order (p)"]
     if isinstance(p_last, float):
-        assert pytest.approx(p_last, 0.5) == 4.0 # RK4 is O(h^4)
+        assert pytest.approx(p_last, 0.2) == 2.0
 
-def test_parameter_sweep():
-    # dx/dt = mu*x - x^3
-    sys = ["mu*x - x**3"]
-    sweep = parameter_sweep_equilibria(sys, "x", "mu", [-1.0, 1.0])
-    
-    # For mu=-1, x=0 is only real equilibrium
-    assert len(sweep[0]["Equilibria"]) == 1
-    # For mu=1, x=0, 1, -1
-    assert len(sweep[1]["Equilibria"]) == 3
+def test_equilibrium_and_stability():
+    # Lotka-Volterra
+    sys = ["x - x*y", "x*y - y"]
+    eq_pts = find_equilibria(sys, "x, y")
+    assert [1.0, 1.0] in eq_pts
+    stab = analyze_stability(sys, "x, y", [1.0, 1.0])
+    assert "Center" in stab["Classification"]
+
+def test_stiff_solver_adaptive():
+    f = lambda t, y: -1000 * y
+    t, y, status = solve_adaptive(f, 0, np.array([1.0]), 0.1, stiff=True)
+    assert "SUCCESS" in status["Status"]
+    assert "BDF" in status["Method"]
+    assert pytest.approx(y[-1][0], 1e-2) == 0.0
