@@ -1,123 +1,124 @@
-# ... [Keep Milestones 1 to 15 unchanged] ...
+# ... [Keep Milestones 1 to 16 unchanged] ...
 
-elif page == "Milestone 16: Adv. Differential Equations":
-    st.title("Advanced Differential Equations & Dynamical Systems Laboratory")
-    st.markdown("Analyze Matrix Systems, Characteristic Roots, Chaos (Sensitivity), Stiff ODEs, and Energy Conservation.")
+elif page == "Milestone 17: Adv. Differential Equations":
+    st.title("Advanced Differential Equations & Dynamical Systems")
+    st.markdown("Solve ODEs analytically, benchmark convergence rates, and analyze nonlinear chaos/bifurcations.")
 
-    from calculus.differential_equations.second_order import analyze_constant_coeff_linear
-    from calculus.differential_equations.systems import analyze_matrix_system, create_numerical_system
-    from calculus.differential_equations.ode_analysis import verify_conservation
+    from calculus.differential_equations.ode_analysis import classify_single_ode, sensitivity_analysis, parameter_sweep_equilibria
+    from calculus.differential_equations.symbolic_solutions import solve_symbolic_ode
+    from calculus.differential_equations.systems import create_numerical_system
+    from calculus.differential_equations.equilibrium import find_equilibria
+    from calculus.differential_equations.stability import analyze_stability
+    from calculus.differential_equations.numerical_solvers import run_convergence_study
     from numerical.ode_solvers import solve_fixed_step, solve_adaptive
-    from visualization.differential_equation_plots import plot_sensitivity, plot_energy_variation
+    from visualization.ode_plots import plot_solution_comparison, plot_phase_portrait_with_nullclines, plot_3d_trajectory, plot_sensitivity_separation
 
     tabs = st.tabs([
-        "2nd-Order & Matrix Systems", 
-        "Conservation & Energy", 
-        "Sensitivity (Chaos)", 
-        "Stiffness Foundation"
+        "ODE Classification & Analytical",
+        "Numerical Solvers & Convergence", 
+        "Dynamical Systems & Nullclines", 
+        "Bifurcation & Chaos",
+        "Classic System Sandbox"
     ])
 
     with tabs[0]:
-        st.header("Linear Systems Analysis")
-        st.subheader("1. Second-Order Linear ODEs ($ay'' + by' + cy = 0$)")
-        c1, c2, c3 = st.columns(3)
-        with c1: a_coef = st.number_input("a:", value=1.0)
-        with c2: b_coef = st.number_input("b:", value=2.0)
-        with c3: c_coef = st.number_input("c:", value=5.0)
+        st.header("ODE Classification & Symbolic Solution")
+        c1, c2 = st.columns(2)
+        with c1: eq_input = st.text_input("Equation (e.g. y' + y = x):", "y'' + 4*y = 0")
+        with c2: ivp_input = st.text_input("Initial Conditions (e.g. y(0)=1, y'(0)=0):", "y(0)=1")
         
-        if st.button("Analyze Characteristic Equation"):
-            res2 = analyze_constant_coeff_linear(a_coef, b_coef, c_coef)
-            st.write(f"- **Roots:** `{res2['Roots']}`")
-            st.write(f"- **Classification:** `{res2['Root Classification']}`")
-            st.latex("y_h(x) = " + sp.latex(res2["Homogeneous Solution y_h(x)"]))
-
-        st.divider()
-        st.subheader("2. Matrix Systems ($X' = AX$)")
-        st.markdown("Enter 2x2 Matrix elements row by row:")
-        m1, m2 = st.columns(2)
-        with m1: a11 = st.number_input("A_11", value=0.0); a21 = st.number_input("A_21", value=-1.0)
-        with m2: a12 = st.number_input("A_12", value=1.0); a22 = st.number_input("A_22", value=-0.5)
+        class_res = classify_single_ode(eq_input)
+        st.write(f"- **Order:** `{class_res.get('Order')}` | **Linear:** `{class_res.get('Linear')}`")
+        st.write(f"- **Homogeneous:** `{class_res.get('Homogeneous')}` | **Autonomous:** `{class_res.get('Is Autonomous')}`")
         
-        if st.button("Analyze Matrix System"):
-            A_mat = [[a11, a12], [a21, a22]]
-            res_mat = analyze_matrix_system(A_mat)
-            st.latex(r"A = " + sp.latex(res_mat["Matrix A"]))
-            st.write(f"- **Eigenvalues:** `{res_mat['Eigenvalues']}`")
-            st.write(f"- **Trace ($\Delta$):** `{res_mat['Trace']}` | **Determinant ($D$):** `{res_mat['Determinant']}`")
-            st.success(f"**Classification:** {res_mat['Classification']}")
+        if st.button("Solve Symbolically"):
+            ivp_dict = {}
+            if ivp_input.strip():
+                for cond in ivp_input.split(','):
+                    k, v = cond.split('=')
+                    ivp_dict[k.strip()] = float(v.strip())
+            sol_res = solve_symbolic_ode(eq_input, ivp=ivp_dict)
+            if sol_res["Status"] == "Success":
+                st.success("Analytical Solution Verified")
+                st.latex(sp.latex(sol_res["General/Particular Solution"]))
+            else:
+                st.error(sol_res["Error"])
 
     with tabs[1]:
-        st.header("Conservation Laws & Energy")
-        st.markdown("Symbolically verifies if a given invariant $I(X)$ is conserved ($dI/dt = 0$) along system trajectories.")
+        st.header("Numerical Convergence Study")
+        st.markdown("Analyzes empirical convergence order $p \approx \log(E_1/E_2) / \log(h_1/h_2)$ against exact solutions.")
         
-        eq1 = st.text_input("dx/dt = f(x,y):", "y", key="e1")
-        eq2 = st.text_input("dy/dt = g(x,y):", "-sin(x)", key="e2")
-        inv = st.text_input("Candidate Invariant I(x,y) (e.g. Energy):", "0.5*y^2 - cos(x)")
-        
-        if st.button("Verify Conservation"):
-            con_res = verify_conservation([eq1, eq2], "x, y", inv)
-            st.latex(r"\frac{dI}{dt} = \nabla I \cdot \vec{F} = " + sp.latex(con_res["Derivative dI/dt"]))
-            if con_res["Is Conserved"]:
-                st.success(f"✅ {con_res['Interpretation']}")
-            else:
-                st.warning(f"❌ {con_res['Interpretation']}")
-                
-        st.subheader("Numerical Energy Fluctuation")
-        st.markdown("Visualizes numerical drift or dissipation in the Energy function over time.")
-        if st.button("Plot Energy Variation (RK45)"):
-            f_sys = create_numerical_system([eq1, eq2], "x, y")
-            t_vals, y_vals, _ = solve_adaptive(lambda t, y: f_sys(t, y), 0, np.array([3.0, 0.0]), 20.0)
-            st.pyplot(plot_energy_variation(t_vals, y_vals, inv, "x, y"))
+        conv_method = st.selectbox("Solver:", ["Euler", "Heun", "Midpoint", "RK4"], index=3)
+        if st.button(f"Run Convergence Study ({conv_method})"):
+            # Using standard test: y' = y, y(0)=1 -> Exact: e^x
+            f = lambda x, y: y
+            exact = lambda x: np.exp(x)
+            
+            study = run_convergence_study(f, exact, 0.0, np.array([1.0]), 2.0, 0.4, conv_method)
+            st.dataframe(pd.DataFrame(study), use_container_width=True)
+            st.info(f"Theoretical orders: Euler $O(h)$, Midpoint/Heun $O(h^2)$, RK4 $O(h^4)$. Observe the 'Observed Order (p)'.")
 
     with tabs[2]:
-        st.header("Sensitive Dependence (Chaos Foundation)")
-        st.markdown("Measures trajectory divergence resulting from an infinitesimally shifted initial condition ($X_0 + \delta X$). Exponential separation strongly indicates chaos.")
+        st.header("Phase Space, Equilibria & Nullclines")
+        s1, s2 = st.columns(2)
+        with s1: dx_dt = st.text_input("dx/dt = f(x,y):", "x - x*y")
+        with s2: dy_dt = st.text_input("dy/dt = g(x,y):", "x*y - y")
         
-        p1, p2 = st.columns(2)
-        with p1: s_dx = st.text_input("dx/dt:", "10*(y - x)", key="sd1") # Lorenz X
-        with p2: s_dy = st.text_input("dy/dt:", "x*(28 - z) - y", key="sd2") # Lorenz Y
-        s_dz = st.text_input("dz/dt:", "x*y - 8/3*z", key="sd3") # Lorenz Z
+        st.pyplot(plot_phase_portrait_with_nullclines([dx_dt, dy_dt], "x, y", (-1, 3), (-1, 3)))
         
-        if st.button("Simulate Trajectory Separation"):
-            f_chaos = create_numerical_system([s_dx, s_dy, s_dz], "x, y, z")
-            def wrapper(t, Y): return f_chaos(t, Y)
-            
-            # Base trajectory
-            t1, y1, _ = solve_adaptive(wrapper, 0, np.array([1.0, 1.0, 1.0]), 25.0)
-            # Perturbed trajectory
-            t2, y2, _ = solve_adaptive(wrapper, 0, np.array([1.0, 1.0, 1.00001]), 25.0)
-            
-            # Align times (Interpolation for direct subtraction)
-            from scipy.interpolate import interp1d
-            common_t = np.linspace(0, 25.0, 1000)
-            y1_interp = interp1d(t1, y1, axis=0)(common_t)
-            y2_interp = interp1d(t2, y2, axis=0)(common_t)
-            
-            st.pyplot(plot_sensitivity(common_t, y1_interp, y2_interp))
+        eqs = [dx_dt, dy_dt]
+        eq_points = find_equilibria(eqs, "x, y")
+        if eq_points:
+            for pt in eq_points:
+                stab = analyze_stability(eqs, "x, y", pt)
+                st.write(f"**Equilibrium `{pt}`** -> `{stab.get('Classification')}`")
 
     with tabs[3]:
-        st.header("Stiffness Foundation")
-        st.markdown("Some equations possess drastically different timescales, causing explicit solvers (RK4) to fail unless step sizes are microscopically small. **Implicit solvers (BDF/Radau)** bypass this limit.")
+        st.header("Chaos (Sensitivity) & Bifurcations")
+        st.subheader("1. Sensitive Dependence on Initial Conditions")
+        st.markdown("In chaotic systems (like Lorenz), an infinitesimal change $\delta$ in $X_0$ causes exponential divergence.")
         
-        st.info("**Example Stiff ODE:** Van der Pol oscillator with high $\mu$ ($y'' - 1000(1-y^2)y' + y = 0$)")
-        stiff_mode = st.radio("Select Solver Type:", ["Explicit (RK45) - Likely to crash/stall", "Implicit (BDF) - Stiff Stable"])
+        l_x = st.text_input("dx/dt:", "10*(y - x)")
+        l_y = st.text_input("dy/dt:", "x*(28 - z) - y")
+        l_z = st.text_input("dz/dt:", "x*y - 8/3*z")
         
-        if st.button("Solve Stiff System"):
-            stiff = (stiff_mode == "Implicit (BDF) - Stiff Stable")
-            # Van der Pol mu = 1000
-            f_vdp = lambda t, Y: np.array([Y[1], 1000*(1 - Y[0]**2)*Y[1] - Y[0]])
+        if st.button("Simulate 3D Chaotic System"):
+            f_sys = create_numerical_system([l_x, l_y, l_z], "x, y, z")
+            t, y_vals, _ = solve_adaptive(lambda t, Y: f_sys(t, Y), 0, np.array([1.0, 1.0, 1.0]), 30.0)
             
-            import time
-            start_time = time.time()
-            t_s, y_s, stat = solve_adaptive(f_vdp, 0, np.array([2.0, 0.0]), 3000.0, stiff=stiff)
-            elapsed = time.time() - start_time
-            
-            if "SUCCESS" in stat:
-                st.success(f"{stat} in {elapsed:.3f} seconds. ({len(t_s)} evaluation steps)")
-                fig, ax = plt.subplots(figsize=(9, 4))
-                ax.plot(t_s, y_s[:, 0], color='black')
-                ax.set_title(f"Stiff System Solution ({stiff_mode})")
-                st.pyplot(fig)
-            else:
-                st.error(f"Solver stalled or failed: {stat}. Elapsed: {elapsed:.2f}s")
+            c3, c4 = st.columns(2)
+            with c3:
+                st.pyplot(plot_3d_trajectory(t, y_vals, "x, y, z"))
+            with c4:
+                t_sep, sep = sensitivity_analysis(lambda t, Y: f_sys(t, Y), 30.0, np.array([1.0, 1.0, 1.0]), delta=1e-5)
+                st.pyplot(plot_sensitivity_separation(t_sep, sep))
+                st.caption("Exponential growth of separation proves chaotic sensitivity.")
+                
+        st.divider()
+        st.subheader("2. Bifurcation Parameter Sweep")
+        st.markdown("Track how equilibrium locations change or appear/disappear as a parameter $\mu$ sweeps.")
+        bif_eq = st.text_input("System (use 'mu'):", "mu*x - x^3")
+        if st.button("Sweep mu = [-1.0, 0.0, 1.0]"):
+            sweep = parameter_sweep_equilibria([bif_eq], "x", "mu", [-1.0, 0.0, 1.0])
+            for res in sweep:
+                st.write(f"- $\mu = {res['Parameter Value']}$  $\Rightarrow$ Equilibria at: `{res['Equilibria']}`")
+            st.info("Notice Pitchfork Bifurcation: At mu < 0, 1 root. At mu > 0, 3 roots.")
 
+    with tabs[4]:
+        st.header("Classic Dynamical Models Sandbox")
+        preset = st.selectbox("Load Classic System:", [
+            "Harmonic Oscillator (Center)",
+            "Damped Oscillator (Stable Spiral)",
+            "Van der Pol Oscillator (Limit Cycle)",
+            "Lotka-Volterra (Predator-Prey)"
+        ])
+        
+        if "Harmonic" in preset:
+            st.code("dx/dt = y\ndy/dt = -x")
+        elif "Damped" in preset:
+            st.code("dx/dt = y\ndy/dt = -x - 0.5*y")
+        elif "Van der Pol" in preset:
+            st.code("dx/dt = y\ndy/dt = (1 - x^2)*y - x")
+        elif "Lotka-Volterra" in preset:
+            st.code("dx/dt = x - x*y\ndy/dt = x*y - y")
+        st.info("Input these equations into the Phase Space or Bifurcation tabs to explore their dynamics.")
