@@ -1,124 +1,99 @@
-# ... [Keep Milestones 1 to 16 unchanged] ...
+# ... [Keep Milestones 1 to 17 unchanged] ...
 
-elif page == "Milestone 17: Adv. Differential Equations":
-    st.title("Advanced Differential Equations & Dynamical Systems")
-    st.markdown("Solve ODEs analytically, benchmark convergence rates, and analyze nonlinear chaos/bifurcations.")
+elif page == "Milestone 18: Adv. Differential Equations":
+    st.title("Advanced Differential Equations & Dynamical Systems Laboratory")
+    st.markdown("Solve BVPs/IVPs, benchmark numerical steppers (Euler to RK4), and dissect Phase Space topology.")
 
-    from calculus.differential_equations.ode_analysis import classify_single_ode, sensitivity_analysis, parameter_sweep_equilibria
-    from calculus.differential_equations.symbolic_solutions import solve_symbolic_ode
+    from calculus.differential_equations.ode_analysis import classify_ode, compute_error_metrics, step_size_convergence_study
+    from calculus.differential_equations.symbolic_solver import solve_symbolic_ode
+    from calculus.differential_equations.numerical_solver import solve_fixed_step, solve_adaptive
     from calculus.differential_equations.systems import create_numerical_system
     from calculus.differential_equations.equilibrium import find_equilibria
     from calculus.differential_equations.stability import analyze_stability
-    from calculus.differential_equations.numerical_solvers import run_convergence_study
-    from numerical.ode_solvers import solve_fixed_step, solve_adaptive
-    from visualization.ode_plots import plot_solution_comparison, plot_phase_portrait_with_nullclines, plot_3d_trajectory, plot_sensitivity_separation
+    from visualization.dynamical_system_plots import plot_direction_field, plot_solver_comparison, plot_phase_portrait_complete
 
     tabs = st.tabs([
-        "ODE Classification & Analytical",
+        "ODE Classification & Symbolic", 
         "Numerical Solvers & Convergence", 
-        "Dynamical Systems & Nullclines", 
-        "Bifurcation & Chaos",
-        "Classic System Sandbox"
+        "Dynamical Systems & Phase Space", 
+        "Stiffness & Stability"
     ])
 
     with tabs[0]:
-        st.header("ODE Classification & Symbolic Solution")
-        c1, c2 = st.columns(2)
-        with c1: eq_input = st.text_input("Equation (e.g. y' + y = x):", "y'' + 4*y = 0")
-        with c2: ivp_input = st.text_input("Initial Conditions (e.g. y(0)=1, y'(0)=0):", "y(0)=1")
+        st.header("Symbolic Integration & Classification")
+        c1, c2 = st.columns([2, 1])
+        with c1: eq_input = st.text_input("ODE (use y' and y''):", "y'' + 4*y = 0")
+        with c2: ivp_input = st.text_input("IVP (e.g. y(0)=1, y'(0)=0):", "y(0)=1, y'(0)=0")
         
-        class_res = classify_single_ode(eq_input)
-        st.write(f"- **Order:** `{class_res.get('Order')}` | **Linear:** `{class_res.get('Linear')}`")
-        st.write(f"- **Homogeneous:** `{class_res.get('Homogeneous')}` | **Autonomous:** `{class_res.get('Is Autonomous')}`")
+        class_res = classify_ode(eq_input)
+        if "Error" not in class_res:
+            st.write(f"- **Order:** `{class_res['Order']}` | **Linearity:** `{class_res['Linearity']}`")
+            st.write(f"- **Type:** `{class_res['Homogeneity']}`, `{class_res['Autonomous']}`")
+            st.caption(f"Methods: {', '.join(class_res['Supported Methods'][:3])}...")
         
-        if st.button("Solve Symbolically"):
-            ivp_dict = {}
-            if ivp_input.strip():
-                for cond in ivp_input.split(','):
-                    k, v = cond.split('=')
-                    ivp_dict[k.strip()] = float(v.strip())
+        if st.button("Solve Symbolically (SymPy)"):
+            ivp_dict = {k.strip(): float(v.strip()) for k, v in [cond.split('=') for cond in ivp_input.split(',')] if cond} if ivp_input else {}
             sol_res = solve_symbolic_ode(eq_input, ivp=ivp_dict)
             if sol_res["Status"] == "Success":
-                st.success("Analytical Solution Verified")
+                st.success("✅ Analytical Solution Found & Verified via Residual Check")
                 st.latex(sp.latex(sol_res["General/Particular Solution"]))
             else:
                 st.error(sol_res["Error"])
 
     with tabs[1]:
-        st.header("Numerical Convergence Study")
-        st.markdown("Analyzes empirical convergence order $p \approx \log(E_1/E_2) / \log(h_1/h_2)$ against exact solutions.")
+        st.header("Numerical Steppers & Error Analysis")
+        n1, n2, n3 = st.columns(3)
+        with n1: f_input = st.text_input("dy/dx = f(x,y):", "y", key="n_f")
+        with n2: h_val = st.number_input("Base Step Size (h):", value=0.5)
+        with n3: x_end = st.number_input("Final x:", value=5.0)
         
-        conv_method = st.selectbox("Solver:", ["Euler", "Heun", "Midpoint", "RK4"], index=3)
-        if st.button(f"Run Convergence Study ({conv_method})"):
-            # Using standard test: y' = y, y(0)=1 -> Exact: e^x
-            f = lambda x, y: y
-            exact = lambda x: np.exp(x)
+        f_num = create_numerical_system([f_input], "y")
+        def f_wrap(x, y): return f_num(x, y)[0]
+        
+        if st.button("Compare All Solvers"):
+            exact_y = np.exp(np.linspace(0, x_end, int(np.ceil(x_end/h_val)) + 1)) if f_input.strip() == "y" else None
+            results = {}
+            for method in ["Euler", "Heun", "RK2 (Midpoint)", "RK3", "RK4"]:
+                x_num, y_num, stat = solve_fixed_step(f_wrap, 0.0, np.array([1.0]), x_end, h_val, method)
+                if stat == "SUCCESS": results[method] = y_num
+                
+            st.pyplot(plot_solver_comparison(x_num, results, exact_y))
             
-            study = run_convergence_study(f, exact, 0.0, np.array([1.0]), 2.0, 0.4, conv_method)
-            st.dataframe(pd.DataFrame(study), use_container_width=True)
-            st.info(f"Theoretical orders: Euler $O(h)$, Midpoint/Heun $O(h^2)$, RK4 $O(h^4)$. Observe the 'Observed Order (p)'.")
+            if exact_y is not None:
+                st.subheader("Convergence Study: Order Estimation $p$")
+                st.markdown("For $y'=y$, halving $h$ reveals the characteristic experimental convergence order.")
+                study = step_size_convergence_study(f_wrap, lambda x: np.exp(x), 0.0, np.array([1.0]), x_end, h_val, "RK4")
+                st.dataframe(pd.DataFrame(study), use_container_width=True)
 
     with tabs[2]:
-        st.header("Phase Space, Equilibria & Nullclines")
+        st.header("Phase Space & Nullclines")
         s1, s2 = st.columns(2)
         with s1: dx_dt = st.text_input("dx/dt = f(x,y):", "x - x*y")
         with s2: dy_dt = st.text_input("dy/dt = g(x,y):", "x*y - y")
         
-        st.pyplot(plot_phase_portrait_with_nullclines([dx_dt, dy_dt], "x, y", (-1, 3), (-1, 3)))
-        
         eqs = [dx_dt, dy_dt]
-        eq_points = find_equilibria(eqs, "x, y")
-        if eq_points:
-            for pt in eq_points:
-                stab = analyze_stability(eqs, "x, y", pt)
-                st.write(f"**Equilibrium `{pt}`** -> `{stab.get('Classification')}`")
+        equilibria = find_equilibria(eqs, "x, y")
+        st.pyplot(plot_phase_portrait_complete(eqs, "x, y", (-1, 3), (-1, 3), equilibria))
+        
+        if equilibria:
+            st.subheader("Linearized Stability (Jacobian Eigenvalues)")
+            for eq in equilibria:
+                stab = analyze_stability(eqs, "x, y", eq)
+                st.write(f"- **Point `{eq}`:** Classification $\\rightarrow$ `{stab.get('Classification')}`")
+                st.caption(f"Eigenvalues: {stab.get('Eigenvalues')}")
 
     with tabs[3]:
-        st.header("Chaos (Sensitivity) & Bifurcations")
-        st.subheader("1. Sensitive Dependence on Initial Conditions")
-        st.markdown("In chaotic systems (like Lorenz), an infinitesimal change $\delta$ in $X_0$ causes exponential divergence.")
+        st.header("Direction Fields & Stiffness")
+        df_eq = st.text_input("dy/dx = f(x,y):", "sin(x) - y")
+        st.pyplot(plot_direction_field(df_eq, (-5, 5), (-5, 5)))
         
-        l_x = st.text_input("dx/dt:", "10*(y - x)")
-        l_y = st.text_input("dy/dt:", "x*(28 - z) - y")
-        l_z = st.text_input("dz/dt:", "x*y - 8/3*z")
-        
-        if st.button("Simulate 3D Chaotic System"):
-            f_sys = create_numerical_system([l_x, l_y, l_z], "x, y, z")
-            t, y_vals, _ = solve_adaptive(lambda t, Y: f_sys(t, Y), 0, np.array([1.0, 1.0, 1.0]), 30.0)
-            
-            c3, c4 = st.columns(2)
-            with c3:
-                st.pyplot(plot_3d_trajectory(t, y_vals, "x, y, z"))
-            with c4:
-                t_sep, sep = sensitivity_analysis(lambda t, Y: f_sys(t, Y), 30.0, np.array([1.0, 1.0, 1.0]), delta=1e-5)
-                st.pyplot(plot_sensitivity_separation(t_sep, sep))
-                st.caption("Exponential growth of separation proves chaotic sensitivity.")
-                
         st.divider()
-        st.subheader("2. Bifurcation Parameter Sweep")
-        st.markdown("Track how equilibrium locations change or appear/disappear as a parameter $\mu$ sweeps.")
-        bif_eq = st.text_input("System (use 'mu'):", "mu*x - x^3")
-        if st.button("Sweep mu = [-1.0, 0.0, 1.0]"):
-            sweep = parameter_sweep_equilibria([bif_eq], "x", "mu", [-1.0, 0.0, 1.0])
-            for res in sweep:
-                st.write(f"- $\mu = {res['Parameter Value']}$  $\Rightarrow$ Equilibria at: `{res['Equilibria']}`")
-            st.info("Notice Pitchfork Bifurcation: At mu < 0, 1 root. At mu > 0, 3 roots.")
-
-    with tabs[4]:
-        st.header("Classic Dynamical Models Sandbox")
-        preset = st.selectbox("Load Classic System:", [
-            "Harmonic Oscillator (Center)",
-            "Damped Oscillator (Stable Spiral)",
-            "Van der Pol Oscillator (Limit Cycle)",
-            "Lotka-Volterra (Predator-Prey)"
-        ])
-        
-        if "Harmonic" in preset:
-            st.code("dx/dt = y\ndy/dt = -x")
-        elif "Damped" in preset:
-            st.code("dx/dt = y\ndy/dt = -x - 0.5*y")
-        elif "Van der Pol" in preset:
-            st.code("dx/dt = y\ndy/dt = (1 - x^2)*y - x")
-        elif "Lotka-Volterra" in preset:
-            st.code("dx/dt = x - x*y\ndy/dt = x*y - y")
-        st.info("Input these equations into the Phase Space or Bifurcation tabs to explore their dynamics.")
+        st.subheader("Stiffness & Adaptive Integration")
+        st.markdown("Explicit solvers (RK4) crash when integrating stiff equations. Implicit adaptive methods (BDF) adjust $h$ dynamically.")
+        if st.button("Run Stiff Simulation (Van der Pol, $\mu=1000$)"):
+            f_vdp = lambda t, Y: np.array([Y[1], 1000*(1 - Y[0]**2)*Y[1] - Y[0]])
+            _, _, stat_rk45 = solve_adaptive(f_vdp, 0, np.array([2.0, 0.0]), 10.0, stiff=False)
+            t_bdf, y_bdf, stat_bdf = solve_adaptive(f_vdp, 0, np.array([2.0, 0.0]), 3000.0, stiff=True)
+            
+            st.error(f"**Explicit (RK45) Status:** {stat_rk45['Status']} - Step size became too small.")
+            st.success(f"**Implicit (BDF) Status:** {stat_bdf['Status']} - Integrated successfully over 3000s in {stat_bdf['Accepted Steps']} steps.")
