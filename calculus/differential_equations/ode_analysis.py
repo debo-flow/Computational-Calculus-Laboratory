@@ -1,24 +1,21 @@
 import sympy as sp
+from typing import Dict, Any
 
-def classify_single_ode(eq_str: str, func_name: str = 'y', var_name: str = 'x') -> dict:
-    """Classifies a symbolic ODE (Order, Linearity, Homogeneity)."""
-    x = sp.Symbol(var_name, real=True)
-    y = sp.Function(func_name)(x)
+def verify_conservation(sys_exprs: list, vars_str: str, invariant_str: str) -> Dict[str, Any]:
+    """Tests if dI/dt = 0 exactly along the trajectories of the system."""
+    variables = sp.symbols(vars_str)
+    vector_field = [sp.sympify(e) for e in sys_exprs]
+    invariant = sp.sympify(invariant_str)
     
-    # Parse equation: support "y'' + y = 0" or just "y'' + y"
-    eq_parts = eq_str.split('=')
-    lhs = sp.sympify(eq_parts[0])
-    rhs = sp.sympify(eq_parts[1]) if len(eq_parts) > 1 else sp.S.Zero
-    ode_expr = lhs - rhs
+    # Chain Rule: dI/dt = ∇I · F
+    grad_I = [sp.diff(invariant, v) for v in variables]
+    dI_dt = sp.simplify(sum(g * f for g, f in zip(grad_I, vector_field)))
     
-    try:
-        classifications = sp.classify_ode(sp.Eq(ode_expr, 0), y)
-        order = sp.ode_order(ode_expr, y)
-        return {
-            "Equation": sp.Eq(ode_expr, 0),
-            "Order": order,
-            "Classifications": classifications,
-            "Is Autonomous": not ode_expr.has(x)
-        }
-    except Exception as e:
-        return {"Error": f"Classification failed: {e}"}
+    is_conserved = (dI_dt == 0)
+    
+    return {
+        "Candidate Invariant I(X)": invariant,
+        "Derivative dI/dt": dI_dt,
+        "Is Conserved": is_conserved,
+        "Interpretation": "Constant of motion verified." if is_conserved else "Quantity is not conserved."
+    }
