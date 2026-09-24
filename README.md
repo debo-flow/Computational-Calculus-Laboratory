@@ -1,27 +1,30 @@
 # Computational Calculus Laboratory
 
-**Milestone 16 — Advanced Differential Equations & Dynamical Systems Laboratory**
+**Milestone 17 — Advanced Differential Equations & Dynamical Systems Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 16 solidifies the **Dynamical Systems Laboratory**. It expands beyond solver implementation into deep dynamical system properties: identifying structural stiffness, tracing sensitive dependence on initial conditions (Chaos theory foundations), evaluating characteristic matrix stability, and rigorously tracking physical energy conservation laws via symbolic derivatives and numerical drift analysis.
+Milestone 17 is the culminating architecture for the **Advanced Differential Equations & Dynamical Systems Laboratory**. It unites linear algebra, vector fields, and exact numerical approximation to evaluate multidimensional ODEs. It heavily focuses on rigorous error bounds, empirical convergence orders ($p \approx \log(E_1/E_2)/\log(h_1/h_2)$), nullcline mapping, and bifurcation / chaos foundations.
 
 ## Features Implemented
 
-### Milestone 16: Advanced ODEs & Dynamical Systems
-* **Matrix Linear Systems & Characteristic Roots:** Computes homogeneous solutions for $ay'' + by' + cy = 0$ via characteristic root classification, and provides strict determinant/trace stability analysis for linear 2x2 matrix systems ($X' = AX$).
-* **Conservation Laws & Energy:** Symbolically proves the existence of system invariants by deriving $dI/dt = \nabla I \cdot \vec{F} = 0$, and visually tracks numerical energy dissipation/drift over long integration times.
-* **Sensitive Dependence (Chaos):** Simulates coupled chaotic attractors (e.g., Lorenz) under infinitesimal perturbations ($X_0 + \delta X$), graphing the exponential trajectory divergence over time via interpolation.
-* **Stiffness Foundations:** Introduces implicit integration frameworks (BDF/Radau via SciPy) allowing the stable resolution of multi-timescale stiff ODEs (e.g., Van der Pol oscillator $\mu = 1000$) where explicit methods (RK45) catastrophically stall.
-* **Unified ODE Solver API:** Consolidates explicit fixed-step solvers (Euler, Heun, Midpoint, RK4) alongside Adaptive explicit/implicit routines into a single, scalable pipeline.
+### Milestone 17: Differential Equations Finalization
+* **ODE Classification & Exact Solvers:** Symbolically parses Linearity, Homogeneity, and Autonomy. Computes Exact, Separable, and First-Order Linear integrating factors utilizing SymPy residual verification.
+* **Empirical Convergence Benchmarking:** Systematically halves $h$ iteratively to prove the theoretical convergence limits of Explicit Euler $O(h)$, Midpoint $O(h^2)$, and RK4 $O(h^4)$.
+* **Dynamical Phase Spaces:** Maps interactive vector fields overlaid with computed $f(x,y)=0$ and $g(x,y)=0$ Nullclines to visually anchor equilibrium candidates.
+* **Bifurcation & Chaos Foundations:** 
+  * Parameter sweeps iteratively track the creation/destruction of roots (e.g., Pitchfork Bifurcations at $\mu=0$).
+  * Sensitivity analysis generates log-scale plots tracking the exponential divergence $D(t) = ||X_1(t) - X_2(t)||$ of perturbed initial states (e.g., Lorenz Attractors).
+* **Unified Solvers & 3D Visualization:** Maps adaptive $N$-dimensional trajectories, rendering 3D parametric phase space limits.
 
 ### Earlier Milestones (Preserved)
-* **M15:** Boundary Value Problems (BVP), Isoclines, First-Order Analytical.
-* **M14:** Phase Space, Jacobian Linearization, Numerical Initial Value Problems.
-* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Theorems).
-* **M12:** Multiple Integrals (Iterated, Monte Carlo, Jacobians).
-* **M11:** Multivariable Calculus (Gradients, Jacobians, Hessian).
+* **M16:** Stiff ODE Integration (BDF), Matrix Characteristic Root Analysis.
+* **M15:** Boundary Value Problems (Shooting, Finite Difference).
+* **M14:** Jacobian Linearization, Eigenvalue Stability Classification.
+* **M13:** Advanced Vector Calculus (Divergence, Curl, Theorems).
+* **M12:** Multiple Integrals (Iterated, Monte Carlo).
+* **M11:** Multivariable Calculus (Gradients, Jacobians).
 * **M10:** Advanced Taylor Series (Polynomials, Error Bounds).
 * **M9:** Advanced Sequences & Infinite Series.
 * **M8:** Advanced Numerical Integration.
@@ -31,7 +34,7 @@ Milestone 16 solidifies the **Dynamical Systems Laboratory**. It expands beyond 
 * **M4:** Advanced Differential Calculus.
 * **M3:** Continuity & Discontinuity.
 * **M2:** Limits Laboratory.
-* **M1:** Core Foundation & Function Engine.
+* **M1:** Core Foundation.
 
 ## Technology Stack
 * Python 3.9+
