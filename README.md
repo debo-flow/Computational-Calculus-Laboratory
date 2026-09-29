@@ -1,29 +1,30 @@
 # Computational Calculus Laboratory
 
-**Milestone 21 — Advanced Tensor Calculus & Differential Geometry Laboratory**
+**Milestone 22 — Advanced Numerical Calculus & Scientific Computing Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 21 represents the absolute pinnacle of classical analytic and differential mechanics: the **Tensor Calculus & Differential Geometry Laboratory**. It integrates tensor-algebra rules to calculate non-Euclidean intrinsic curvature natively, extracting Christoffel connections, Geodesic ODE trajectories, and Riemann/Ricci tensors exclusively from user-defined arbitrary Metric tensors.
+Milestone 22 introduces the **Scientific Computing Laboratory**, bridging continuous mathematics with discrete numerical implementations. This suite explicitly quantifies algorithmic accuracy vs. precision limits, mapping machine round-off behaviors, truncation boundaries, condition number sensitivities, and establishing explicit finite-difference PDE solver stability limits.
 
 ## Features Implemented
 
-### Milestone 21: Tensor Calculus & Geometry
-* **Metrics & Connections:** Given any metric $g_{ij}$, calculates the determinant $g$, inverse $g^{ij}$, and generates the 3-index Christoffel symbols of the second kind $\Gamma^k_{ij}$.
-* **Curvature Tensors:** Synthesizes the rank-4 Riemann curvature tensor ($R^i_{jkl}$), tracing it to the Ricci tensor ($R_{ij}$) and contracting it with the metric to yield the Scalar Curvature ($R$).
-* **Differential Surface Geometry:** For any parameterized manifold $\vec{r}(u,v)$, computes First ($E,F,G$) and Second ($e,f,g$) Fundamental Forms to derive intrinsic Gaussian Curvature ($K$) and extrinsic Mean Curvature ($H$).
-* **Geodesic Flow Generation:** Translates Christoffel symbols into the acceleration components of the geodesic differential equations: $\frac{d^2 x^k}{d\lambda^2} = - \Gamma^k_{ij} \frac{dx^i}{d\lambda}\frac{dx^j}{d\lambda}$.
-* **Differential Forms:** Implements the exterior derivative $d\omega$ for arbitrary 1-forms, demonstrating the anti-commutative wedge product $dx \wedge dy$ mapping to vector curl.
-* **Surface Curvature Maps:** Plots fully 3D interactive manifolds automatically color-shaded by their localized Gaussian Curvature magnitude.
+### Milestone 22: Scientific Computing & Numerics
+* **Problem Conditioning & Precision:** Isolates algorithmic instability from inherent mathematical sensitivity by computing Relative Condition Numbers ($K$). Evaluates numerical artifacts up to 100-digit precision utilizing `mpmath`.
+* **Numerical Linear Algebra:** Generates robust Singular Value Decompositions ($A = U \Sigma V^T$) and Eigen-system solvers, calculating tight residual bounds ($\vert{}\vert{}Av - \lambda v\vert{}\vert{}$) for validation.
+* **PDE Stability Foundations:** Implements FTCS grid stepping for the 1D Heat Equation ($u_t = \alpha u_{xx}$), strictly enforcing and visually demonstrating exponential blow-up when the Courant–Friedrichs–Lewy (CFL) limit ($\Delta t \le \frac{\Delta x^2}{2\alpha}$) is breached.
+* **Richardson Extrapolation:** Eliminates lowest-order numerical truncation error terms to drastically artificially inflate the order of accuracy of derivative approximations.
+* **Cubic Spline Interpolation:** Reconstructs continuous piecewise functions over discrete, unordered datasets using globally enforced boundary stiffness (Natural Splines).
+* **Reproducibility Benchmarking:** Injects Python versioning, architectural metadata, and millisecond execution metrics into JSON scientific reports for rigorous academic replication.
 
 ### Earlier Milestones (Preserved)
+* **M21:** Tensor Calculus & Differential Geometry (Christoffel, Curvatures).
 * **M20:** Calculus of Variations (Euler-Lagrange, Numerical Functionals).
-* **M19-M14:** Advanced Differential Equations (IVPs, BVPs, Chaos, Stiff Systems).
-* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Green/Stokes Theorems).
-* **M12:** Multiple Integrals (Iterated, Monte Carlo, Jacobians, Laminas).
-* **M11:** Multivariable Calculus (Gradients, Jacobians, Hessian).
-* **M10:** Advanced Taylor Series (Polynomials, Error Bounds).
+* **M19-M14:** Advanced Differential Equations (IVPs, BVPs, Chaos).
+* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux).
+* **M12:** Multiple Integrals (Iterated, Monte Carlo).
+* **M11:** Multivariable Calculus.
+* **M10:** Advanced Taylor Series.
 * **M9:** Advanced Sequences & Infinite Series.
 * **M8:** Advanced Numerical Integration.
 * **M7:** Advanced Integral Calculus.
@@ -36,7 +37,7 @@ Milestone 21 represents the absolute pinnacle of classical analytic and differen
 
 ## Technology Stack
 * Python 3.9+
-* Mathematics: SymPy, NumPy, SciPy
+* Mathematics: SymPy, NumPy, SciPy, mpmath
 * Visualization: Matplotlib
 * UI Framework: Streamlit
 * Testing: Pytest
