@@ -1,110 +1,131 @@
-# ... [Keep Milestones 1 to 21 unchanged] ...
+# ... [Keep Milestones 1 to 22 unchanged] ...
 
-elif page == "Milestone 22: Scientific Computing":
-    st.title("Advanced Numerical Calculus & Scientific Computing Laboratory")
-    st.markdown("Analyze arbitrary precision, discrete linear algebra (SVD/Eigen), cubic splines, and finite-difference PDE foundations.")
+elif page == "Milestone 23: Symbolic CAS":
+    st.title("Advanced Symbolic Mathematics & Computer Algebra System")
+    st.markdown("A unified interface for safe expression parsing, exact algebra, assumptions, and symbolic routing.")
 
-    from numerical.scientific.precision import compare_precision
-    from numerical.scientific.error_analysis import compute_condition_number
-    from numerical.scientific.differentiation import richardson_extrapolation
-    from numerical.scientific.linear_algebra import analyze_svd, analyze_eigen
-    from numerical.scientific.interpolation import cubic_spline_interpolation
-    from numerical.scientific.numerical_engine import solve_1d_heat_pde
-    from numerical.scientific.benchmarking import generate_scientific_report
-    from visualization.scientific_computing_plots import plot_cubic_spline, plot_pde_evolution
+    from calculus.symbolic.symbolic_engine import CASRouter
+    from calculus.symbolic.expression_analysis import analyze_complexity, find_domain_restrictions
+    from calculus.symbolic.assumptions import apply_assumptions_to_expr
 
     tabs = st.tabs([
-        "Precision & Error", 
-        "Linear Algebra (SVD & Eigen)", 
-        "Spline Interpolation", 
-        "PDE Foundations & Stability",
-        "Scientific Reporting"
+        "Parser & Algebra", 
+        "Equations & Inequalities", 
+        "Calculus Router & Laplacian",
+        "Expression Tree & Domain",
+        "CAS Notebook (Stateful)"
     ])
 
     with tabs[0]:
-        st.header("Conditioning, Extrapolation & Arbitrary Precision")
+        st.header("Safe Parsing & Algebraic Manipulation")
+        c1, c2 = st.columns([3, 1])
+        with c1: expr_input = st.text_input("Expression (e.g. `(x+1)^2 / (x^2 - 1)`):", "(x+1)^2 / (x^2 - 1)")
+        with c2: operation = st.selectbox("Operation:", ["simplify", "expand", "factor", "cancel", "apart"])
         
-        st.subheader("1. Problem Conditioning")
-        st.markdown(r"Relative Condition Number $K = \left\vert{} \frac{x \cdot f'(x)}{f(x)} \right\vert{}$. High $K$ indicates inherent mathematical sensitivity to input variance.")
-        c1, c2 = st.columns(2)
-        with c1: f_str = st.text_input("Function f(x):", "exp(x) - 1")
-        with c2: p_val = st.number_input("Evaluation Point x:", value=1e-5, format="%.6f")
-        if st.button("Calculate Condition Number"):
-            st.json(compute_condition_number(f_str, p_val))
-            
+        if st.button("Execute Algebra"):
+            try:
+                if operation == "simplify":
+                    res = CASRouter.simplify(expr_input)
+                else:
+                    res = CASRouter.algebra(expr_input, operation)
+                st.latex(sp.latex(res))
+            except Exception as e:
+                st.error(f"Error: {e}")
+                
         st.divider()
-        st.subheader("2. Arbitrary Precision Evaluation")
-        st.markdown("Compares standard 64-bit IEEE 754 floats against multi-precision libraries (mpmath).")
-        dps_val = st.slider("Target Decimal Places (dps):", 15, 100, 50)
-        if st.button("Compare Precision"):
-            st.json(compare_precision(f_str, p_val, dps=dps_val))
-            
-        st.divider()
-        st.subheader("3. Richardson Extrapolation")
-        st.markdown(r"Eliminates lowest-order truncation errors by combining discrete steps: $A \approx \frac{4D(h/2) - D(h)}{3}$")
-        if st.button("Extrapolate Derivative"):
-            f_eval = lambda x: np.exp(x) - 1 # from defaults
-            st.json(richardson_extrapolation(f_eval, p_val, 0.1))
+        st.subheader("Assumptions Engine")
+        st.markdown("Restricts mathematical domains (e.g., forcing $x$ to be real and positive) to unlock transformations.")
+        assump_expr = st.text_input("Expression to evaluate:", "sqrt(x^2)")
+        if st.button("Evaluate with Assumptions (x is real, positive)"):
+            assumptions = {"real": True, "positive": True}
+            res_assump = apply_assumptions_to_expr(assump_expr, ["x"], assumptions)
+            st.latex(sp.latex(res_assump))
+            st.info("Notice that without positive Real assumptions, $\sqrt{x^2}$ remains unevaluated or simplifies to $\vert{}x\vert{}$.")
 
     with tabs[1]:
-        st.header("Numerical Linear Algebra")
-        mat_in = st.text_area("Input Matrix (Comma separated, rows on new lines):", "1, 2\n3, 4")
-        
-        try:
-            mat_data = [[float(v) for v in row.split(',')] for row in mat_in.strip().split('\n')]
+        st.header("Equations & Inequalities")
+        eq_input = st.text_input("Equation $f(x) = 0$:", "x^3 - 8")
+        if st.button("Solve Exact Equation"):
+            sol_res = CASRouter.solve(eq_input, "x")
+            st.write(f"- **Status:** `{sol_res['Status']}`")
+            st.write(f"- **Solution Set:**")
+            st.latex(sp.latex(sol_res['Solutions']))
             
-            s1, s2 = st.columns(2)
-            with s1:
-                st.subheader("Singular Value Decomposition (SVD)")
-                if st.button("Compute SVD ($A = U \Sigma V^T$)"):
-                    st.json(analyze_svd(mat_data))
-            with s2:
-                st.subheader("Eigenvalue Analysis")
-                if st.button("Compute Eigen system ($Av = \lambda v$)"):
-                    if len(mat_data) == len(mat_data[0]):
-                        st.json(analyze_eigen(mat_data))
-                    else:
-                        st.error("Matrix must be square for Eigenvalue analysis.")
-        except Exception as e:
-            st.error(f"Matrix parsing error: {e}")
+        st.divider()
+        ineq_input = st.text_input("Inequality (e.g. `x^2 - 4 < 0`):", "x^2 - 4 < 0")
+        if st.button("Solve Inequality"):
+            ineq_res = CASRouter.inequalities(ineq_input)
+            st.write(f"- **Valid Interval:**")
+            st.latex(sp.latex(ineq_res['Interval']))
 
     with tabs[2]:
-        st.header("Cubic Spline Interpolation")
-        i1, i2 = st.columns(2)
-        with i1: x_pts = st.text_input("X Data Points:", "0, 1, 2, 3, 4")
-        with i2: y_pts = st.text_input("Y Data Points:", "0, 0.8, 0.9, 0.1, -0.8")
+        st.header("Unified Calculus Router")
+        st.markdown("Routes arbitrary symbolic operations to their respective internal engines without numerical fallback.")
         
-        if st.button("Generate Spline"):
-            x_d = [float(v) for v in x_pts.split(',')]
-            y_d = [float(v) for v in y_pts.split(',')]
+        rout_op = st.selectbox("Select Core Operator:", ["derivative", "integral_indefinite", "limit", "series", "laplacian"])
+        r1, r2 = st.columns(2)
+        with r1: rout_expr = st.text_input("Expression:", "sin(x*y)")
+        with r2: rout_var = st.text_input("Variable(s):", "x, y" if rout_op == "laplacian" else "x")
+        
+        if st.button("Execute Symbolic Operation"):
+            rout_res = CASRouter.calculus_route(rout_op, rout_expr, rout_var)
+            st.latex(sp.latex(rout_res))
             
-            x_eval = np.linspace(min(x_d), max(x_d), 200).tolist()
-            spline_res = cubic_spline_interpolation(x_d, y_d, x_eval, 'natural')
-            
-            st.pyplot(plot_cubic_spline(x_d, y_d, x_eval, spline_res["y_eval"]))
+        st.divider()
+        st.subheader("Symbolic vs. Numerical Verification")
+        v1, v2 = st.columns(2)
+        with v1: exp_a = st.text_input("Expression A:", "sin(x)^2 + cos(x)^2")
+        with v2: exp_b = st.text_input("Expression B:", "1")
+        if st.button("Verify Equivalence"):
+            ver_res = CASRouter.verify(exp_a, exp_b, "x")
+            st.json(ver_res)
 
     with tabs[3]:
-        st.header("PDE Foundation: 1D Heat Equation")
-        st.markdown(r"Numerical integration of $u_t = \alpha u_{xx}$ via Forward-Time Central-Space (FTCS) finite differences.")
+        st.header("Expression Analytics & Trees")
+        anal_expr = st.text_input("Analyze Expression:", "exp(sqrt(x-2)) / (x-5)")
         
-        p1, p2, p3 = st.columns(3)
-        with p1: alpha = st.number_input("Thermal Diffusivity $\alpha$:", value=0.01)
-        with p2: nt = st.number_input("Time Steps ($N_t$):", value=100)
-        with p3: T_end = st.number_input("End Time (T):", value=1.0)
-        
-        if st.button("Simulate PDE & Check CFL Stability"):
-            pde_res = solve_1d_heat_pde(1.0, T_end, 50, nt, alpha)
-            st.write(f"- **CFL Stability Parameter:** `{pde_res['CFL Stability Parameter']:.4f}` (Must be $\le 0.5$)")
+        if st.button("Generate Analytics"):
+            import sympy as sp
+            # Safe local parse
+            from calculus.symbolic.expression_parser import safe_parse
+            p_expr = safe_parse(anal_expr)
             
-            if pde_res["Stable"]:
-                st.success("Scheme is numerically stable.")
-                st.pyplot(plot_pde_evolution(pde_res["x_grid"], pde_res["History"]))
-            else:
-                st.error(f"Scheme is UNSTABLE. $\Delta t$ exceeds the critical limit `{pde_res['Required dt Limit']:.5f}`. The numerical error will amplify exponentially.")
+            c3, c4 = st.columns(2)
+            with c3:
+                st.subheader("Complexity Metrics")
+                st.json(analyze_complexity(p_expr))
+            with c4:
+                st.subheader("Domain Restrictions ($\mathbb{R}$)")
+                st.write(find_domain_restrictions(p_expr, sp.Symbol('x')))
+            
+            st.subheader("Expression Tree AST")
+            st.json(CASRouter.tree(anal_expr))
 
     with tabs[4]:
-        st.header("Reproducible Benchmarking Reports")
-        st.markdown("Appends hardware profiles, execution times, and strict formatting guarantees to experimental runs.")
-        if st.button("Run Benchmark (SVD Decomposition)"):
-            bench = generate_scientific_report(analyze_svd, [[1,2,3],[4,5,6],[7,8,9]])
-            st.json(bench)
+        st.header("Interactive CAS Notebook")
+        st.markdown("Maintain a stateless or session-stored execution list of operations.")
+        
+        if "cas_history" not in st.session_state:
+            st.session_state.cas_history = []
+            
+        cmd_in = st.text_input("Notebook Input (Use syntax: `operation: expression`. E.g., `simplify: x*x/x`):")
+        
+        if st.button("Execute Cell"):
+            try:
+                op, exp = cmd_in.split(":", 1)
+                op, exp = op.strip().lower(), exp.strip()
+                if op == "simplify": out = CASRouter.simplify(exp)
+                elif op in ["expand", "factor", "cancel", "apart"]: out = CASRouter.algebra(exp, op)
+                else: out = "Unsupported Command. Try: simplify, expand, factor, cancel, apart."
+                
+                st.session_state.cas_history.insert(0, {"In": cmd_in, "Out": out})
+            except Exception as e:
+                st.error(f"Notebook syntax error: {e}")
+                
+        if st.button("Clear History"):
+            st.session_state.cas_history = []
+            
+        for idx, cell in enumerate(st.session_state.cas_history):
+            st.markdown(f"**In [{len(st.session_state.cas_history) - idx}]:** `{cell['In']}`")
+            st.latex(sp.latex(cell["Out"]) if isinstance(cell["Out"], sp.Expr) else cell["Out"])
+            st.divider()
