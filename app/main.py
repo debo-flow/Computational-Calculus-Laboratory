@@ -1,117 +1,110 @@
-# ... [Keep Milestones 1 to 20 unchanged] ...
+# ... [Keep Milestones 1 to 21 unchanged] ...
 
-elif page == "Milestone 21: Tensor Geometry":
-    st.title("Advanced Tensor Calculus & Differential Geometry Laboratory")
-    st.markdown("Analyze metric tensors, derive Christoffel symbols, compute Riemannian curvature, and visualize intrinsic surface geometry.")
+elif page == "Milestone 22: Scientific Computing":
+    st.title("Advanced Numerical Calculus & Scientific Computing Laboratory")
+    st.markdown("Analyze arbitrary precision, discrete linear algebra (SVD/Eigen), cubic splines, and finite-difference PDE foundations.")
 
-    from calculus.tensor_geometry.metric import compute_metric_properties, raise_lower_index
-    from calculus.tensor_geometry.christoffel import compute_christoffel_symbols
-    from calculus.tensor_geometry.curvature import compute_riemann_tensor, compute_ricci_tensor, compute_scalar_curvature
-    from calculus.tensor_geometry.geodesics import generate_geodesic_odes
-    from calculus.tensor_geometry.differential_geometry import compute_surface_geometry
-    from calculus.tensor_geometry.geometry_analysis import compute_exterior_derivative_1form
-    from visualization.tensor_geometry_plots import plot_surface_with_curvature
+    from numerical.scientific.precision import compare_precision
+    from numerical.scientific.error_analysis import compute_condition_number
+    from numerical.scientific.differentiation import richardson_extrapolation
+    from numerical.scientific.linear_algebra import analyze_svd, analyze_eigen
+    from numerical.scientific.interpolation import cubic_spline_interpolation
+    from numerical.scientific.numerical_engine import solve_1d_heat_pde
+    from numerical.scientific.benchmarking import generate_scientific_report
+    from visualization.scientific_computing_plots import plot_cubic_spline, plot_pde_evolution
 
     tabs = st.tabs([
-        "Metric & Connections (Christoffel)", 
-        "Riemann Curvature (Tensors)", 
-        "Differential Geometry (Surfaces)", 
-        "Differential Forms"
+        "Precision & Error", 
+        "Linear Algebra (SVD & Eigen)", 
+        "Spline Interpolation", 
+        "PDE Foundations & Stability",
+        "Scientific Reporting"
     ])
 
     with tabs[0]:
-        st.header("Metric Tensors & Christoffel Symbols")
-        st.markdown(r"Given a metric $g_{ij}$, calculates the inverse $g^{ij}$ and connection coefficients $\Gamma^k_{ij}$.")
+        st.header("Conditioning, Extrapolation & Arbitrary Precision")
         
+        st.subheader("1. Problem Conditioning")
+        st.markdown(r"Relative Condition Number $K = \left\vert{} \frac{x \cdot f'(x)}{f(x)} \right\vert{}$. High $K$ indicates inherent mathematical sensitivity to input variance.")
         c1, c2 = st.columns(2)
-        with c1: vars_in = st.text_input("Coordinates (e.g. r, theta):", "r, theta")
-        with c2: metric_in = st.text_input("Metric Matrix g_ij (comma separated rows):", "[1, 0], [0, r^2]")
-        
-        if st.button("Compute Metric & Connections"):
-            try:
-                var_syms = sp.symbols(vars_in)
-                rows = [sp.sympify(row) for row in metric_in.split('],')]
-                g_mat = sp.Matrix(rows)
-                
-                m_res = compute_metric_properties(g_mat)
-                if m_res["Status"] == "Success":
-                    st.latex(r"g_{ij} = " + sp.latex(m_res['g_ij']))
-                    st.latex(r"g^{ij} = " + sp.latex(m_res['g^ij']))
-                    st.write(f"**Metric Determinant ($g$):** `{m_res['Determinant (g)']}`")
-                    
-                    Gamma = compute_christoffel_symbols(m_res['g_ij'], m_res['g^ij'], var_syms)
-                    st.subheader("Non-Zero Christoffel Symbols $\Gamma^k_{ij}$")
-                    
-                    found_any = False
-                    for k in range(len(var_syms)):
-                        for i in range(len(var_syms)):
-                            for j in range(len(var_syms)):
-                                if Gamma[k][i][j] != 0:
-                                    st.latex(rf"\Gamma^{var_syms[k]}_{{{var_syms[i]}{var_syms[j]}}} = " + sp.latex(Gamma[k][i][j]))
-                                    found_any = True
-                    if not found_any:
-                        st.info("All Christoffel symbols are zero (Flat space in Cartesian coordinates).")
-                        
-                    st.subheader("Geodesic Equations")
-                    st.markdown(r"$\frac{d^2 x^k}{d\lambda^2} + \Gamma^k_{ij} \frac{dx^i}{d\lambda}\frac{dx^j}{d\lambda} = 0$")
-                    geo_odes = generate_geodesic_odes(Gamma, var_syms)
-                    for k, ode in enumerate(geo_odes):
-                        st.latex(rf"\frac{{d^2 {var_syms[k]}}}{{d\lambda^2}} = " + sp.latex(ode))
-                        
-            except Exception as e:
-                st.error(f"Error parsing metric: {e}")
+        with c1: f_str = st.text_input("Function f(x):", "exp(x) - 1")
+        with c2: p_val = st.number_input("Evaluation Point x:", value=1e-5, format="%.6f")
+        if st.button("Calculate Condition Number"):
+            st.json(compute_condition_number(f_str, p_val))
+            
+        st.divider()
+        st.subheader("2. Arbitrary Precision Evaluation")
+        st.markdown("Compares standard 64-bit IEEE 754 floats against multi-precision libraries (mpmath).")
+        dps_val = st.slider("Target Decimal Places (dps):", 15, 100, 50)
+        if st.button("Compare Precision"):
+            st.json(compare_precision(f_str, p_val, dps=dps_val))
+            
+        st.divider()
+        st.subheader("3. Richardson Extrapolation")
+        st.markdown(r"Eliminates lowest-order truncation errors by combining discrete steps: $A \approx \frac{4D(h/2) - D(h)}{3}$")
+        if st.button("Extrapolate Derivative"):
+            f_eval = lambda x: np.exp(x) - 1 # from defaults
+            st.json(richardson_extrapolation(f_eval, p_val, 0.1))
 
     with tabs[1]:
-        st.header("Riemann, Ricci, and Scalar Curvature")
-        st.markdown("Derives intrinsic curvature tensors strictly from the metric and connections.")
-        if st.button("Compute Curvature Tensors (requires metric above)"):
-            if 'm_res' in locals() and m_res["Status"] == "Success":
-                R_tensor = compute_riemann_tensor(Gamma, var_syms)
-                Ricci = compute_ricci_tensor(R_tensor, len(var_syms))
-                R_scalar = compute_scalar_curvature(Ricci, m_res['g^ij'], len(var_syms))
-                
-                st.subheader("Ricci Tensor $R_{ij}$")
-                st.latex(r"R_{ij} = " + sp.latex(Ricci))
-                st.subheader("Scalar Curvature $R$")
-                st.latex(r"R = " + sp.latex(R_scalar))
-                if R_scalar == 0:
-                    st.success("Scalar Curvature is 0 (Space is flat or Ricci-flat).")
-            else:
-                st.warning("Please compute the metric in the previous tab first.")
+        st.header("Numerical Linear Algebra")
+        mat_in = st.text_area("Input Matrix (Comma separated, rows on new lines):", "1, 2\n3, 4")
+        
+        try:
+            mat_data = [[float(v) for v in row.split(',')] for row in mat_in.strip().split('\n')]
+            
+            s1, s2 = st.columns(2)
+            with s1:
+                st.subheader("Singular Value Decomposition (SVD)")
+                if st.button("Compute SVD ($A = U \Sigma V^T$)"):
+                    st.json(analyze_svd(mat_data))
+            with s2:
+                st.subheader("Eigenvalue Analysis")
+                if st.button("Compute Eigen system ($Av = \lambda v$)"):
+                    if len(mat_data) == len(mat_data[0]):
+                        st.json(analyze_eigen(mat_data))
+                    else:
+                        st.error("Matrix must be square for Eigenvalue analysis.")
+        except Exception as e:
+            st.error(f"Matrix parsing error: {e}")
 
     with tabs[2]:
-        st.header("Differential Geometry of Surfaces")
-        st.markdown(r"Computes First ($E, F, G$) and Second ($e, f, g$) Fundamental Forms, and intrinsic curvatures for parametrized surfaces $\vec{r}(u,v)$.")
+        st.header("Cubic Spline Interpolation")
+        i1, i2 = st.columns(2)
+        with i1: x_pts = st.text_input("X Data Points:", "0, 1, 2, 3, 4")
+        with i2: y_pts = st.text_input("Y Data Points:", "0, 0.8, 0.9, 0.1, -0.8")
         
-        s1, s2, s3 = st.columns(3)
-        with s1: x_s = st.text_input("x(u,v):", "cos(u)*sin(v)") # Sphere R=1
-        with s2: y_s = st.text_input("y(u,v):", "sin(u)*sin(v)")
-        with s3: z_s = st.text_input("z(u,v):", "cos(v)")
-        
-        if st.button("Analyze Surface Geometry"):
-            s_res = compute_surface_geometry(x_s, y_s, z_s, "u, v")
-            if s_res["Status"] == "Success":
-                c3, c4 = st.columns(2)
-                with c3:
-                    st.write(f"- **First Fundamental Form (E, F, G):** `{s_res['E']}`, `{s_res['F']}`, `{s_res['G']}`")
-                    st.write(f"- **Second Fundamental Form (e, f, g):** `{s_res['e']}`, `{s_res['f']}`, `{s_res['g']}`")
-                with c4:
-                    st.write(f"- **Gaussian Curvature ($K$):** `{s_res['Gaussian Curvature (K)']}`")
-                    st.write(f"- **Mean Curvature ($H$):** `{s_res['Mean Curvature (H)']}`")
-                    
-                st.pyplot(plot_surface_with_curvature(x_s, y_s, z_s, "u, v", (0, 2*np.pi), (0.01, np.pi-0.01), s_res['Gaussian Curvature (K)']))
-            else:
-                st.error(s_res["Error"])
+        if st.button("Generate Spline"):
+            x_d = [float(v) for v in x_pts.split(',')]
+            y_d = [float(v) for v in y_pts.split(',')]
+            
+            x_eval = np.linspace(min(x_d), max(x_d), 200).tolist()
+            spline_res = cubic_spline_interpolation(x_d, y_d, x_eval, 'natural')
+            
+            st.pyplot(plot_cubic_spline(x_d, y_d, x_eval, spline_res["y_eval"]))
 
     with tabs[3]:
-        st.header("Differential Forms & Exterior Derivative")
-        st.markdown(r"Evaluates the exterior derivative $d\omega$ of a 1-form $\omega = P dx + Q dy + R dz$.")
-        w1, w2, w3 = st.columns(3)
-        with w1: w_p = st.text_input("P(x,y,z):", "-y", key="wp")
-        with w2: w_q = st.text_input("Q(x,y,z):", "x", key="wq")
-        with w3: w_r = st.text_input("R(x,y,z):", "z", key="wr")
+        st.header("PDE Foundation: 1D Heat Equation")
+        st.markdown(r"Numerical integration of $u_t = \alpha u_{xx}$ via Forward-Time Central-Space (FTCS) finite differences.")
         
-        if st.button("Compute $d\omega$"):
-            form_res = compute_exterior_derivative_1form(w_p, w_q, w_r, "x, y, z")
-            st.latex(rf"d\omega = ({sp.latex(form_res['dy ∧ dz'])}) dy \wedge dz + ({sp.latex(form_res['dz ∧ dx'])}) dz \wedge dx + ({sp.latex(form_res['dx ∧ dy'])}) dx \wedge dy")
-            st.info(form_res["Interpretation"])
+        p1, p2, p3 = st.columns(3)
+        with p1: alpha = st.number_input("Thermal Diffusivity $\alpha$:", value=0.01)
+        with p2: nt = st.number_input("Time Steps ($N_t$):", value=100)
+        with p3: T_end = st.number_input("End Time (T):", value=1.0)
+        
+        if st.button("Simulate PDE & Check CFL Stability"):
+            pde_res = solve_1d_heat_pde(1.0, T_end, 50, nt, alpha)
+            st.write(f"- **CFL Stability Parameter:** `{pde_res['CFL Stability Parameter']:.4f}` (Must be $\le 0.5$)")
+            
+            if pde_res["Stable"]:
+                st.success("Scheme is numerically stable.")
+                st.pyplot(plot_pde_evolution(pde_res["x_grid"], pde_res["History"]))
+            else:
+                st.error(f"Scheme is UNSTABLE. $\Delta t$ exceeds the critical limit `{pde_res['Required dt Limit']:.5f}`. The numerical error will amplify exponentially.")
+
+    with tabs[4]:
+        st.header("Reproducible Benchmarking Reports")
+        st.markdown("Appends hardware profiles, execution times, and strict formatting guarantees to experimental runs.")
+        if st.button("Run Benchmark (SVD Decomposition)"):
+            bench = generate_scientific_report(analyze_svd, [[1,2,3],[4,5,6],[7,8,9]])
+            st.json(bench)
