@@ -1,131 +1,97 @@
-# ... [Keep Milestones 1 to 22 unchanged] ...
+# ... [Keep Milestones 1 to 23 unchanged] ...
 
-elif page == "Milestone 23: Symbolic CAS":
-    st.title("Advanced Symbolic Mathematics & Computer Algebra System")
-    st.markdown("A unified interface for safe expression parsing, exact algebra, assumptions, and symbolic routing.")
+elif page == "Milestone 24: Verification & Benchmarking":
+    st.title("Automated Theorem Verification & Benchmarking Laboratory")
+    st.markdown("Run rigorous symbolic identity checks, counterexample monte-carlo searches, and computational scaling benchmarks.")
+    st.error("⚠️ **CRITICAL DISTINCTION:** Numerical verification, error bounds, and computational theorem checks provide empirical evidence. **They do not constitute formal mathematical proofs.**")
 
-    from calculus.symbolic.symbolic_engine import CASRouter
-    from calculus.symbolic.expression_analysis import analyze_complexity, find_domain_restrictions
-    from calculus.symbolic.assumptions import apply_assumptions_to_expr
+    from calculus.verification.symbolic_verification import verify_symbolic_identity
+    from calculus.verification.numerical_verification import search_counterexample
+    from calculus.verification.theorem_verification import verify_greens_theorem
+    from benchmarks.benchmark_calculus import scaling_test_polynomial_derivative
+    from visualization.verification_plots import plot_benchmark_scaling
+    from calculus.verification.verification_report import generate_verification_report
 
     tabs = st.tabs([
-        "Parser & Algebra", 
-        "Equations & Inequalities", 
-        "Calculus Router & Laplacian",
-        "Expression Tree & Domain",
-        "CAS Notebook (Stateful)"
+        "Identity Verification", 
+        "Counterexample Search", 
+        "Theorem Validation", 
+        "Benchmarking & Scaling",
+        "Verification Reports"
     ])
 
     with tabs[0]:
-        st.header("Safe Parsing & Algebraic Manipulation")
-        c1, c2 = st.columns([3, 1])
-        with c1: expr_input = st.text_input("Expression (e.g. `(x+1)^2 / (x^2 - 1)`):", "(x+1)^2 / (x^2 - 1)")
-        with c2: operation = st.selectbox("Operation:", ["simplify", "expand", "factor", "cancel", "apart"])
+        st.header("Symbolic Identity Verification")
+        st.markdown("Proves algebraic equivalence by evaluating whether $LHS - RHS$ simplifies unconditionally to exactly $0$.")
+        c1, c2 = st.columns(2)
+        with c1: lhs_in = st.text_input("LHS Expression:", "sin(x)^2 + cos(x)^2")
+        with c2: rhs_in = st.text_input("RHS Expression:", "1")
         
-        if st.button("Execute Algebra"):
-            try:
-                if operation == "simplify":
-                    res = CASRouter.simplify(expr_input)
-                else:
-                    res = CASRouter.algebra(expr_input, operation)
-                st.latex(sp.latex(res))
-            except Exception as e:
-                st.error(f"Error: {e}")
-                
-        st.divider()
-        st.subheader("Assumptions Engine")
-        st.markdown("Restricts mathematical domains (e.g., forcing $x$ to be real and positive) to unlock transformations.")
-        assump_expr = st.text_input("Expression to evaluate:", "sqrt(x^2)")
-        if st.button("Evaluate with Assumptions (x is real, positive)"):
-            assumptions = {"real": True, "positive": True}
-            res_assump = apply_assumptions_to_expr(assump_expr, ["x"], assumptions)
-            st.latex(sp.latex(res_assump))
-            st.info("Notice that without positive Real assumptions, $\sqrt{x^2}$ remains unevaluated or simplifies to $\vert{}x\vert{}$.")
+        if st.button("Verify Identity Symbolically"):
+            sym_res = verify_symbolic_identity(lhs_in, rhs_in)
+            if "SYMBOLICALLY VERIFIED" in sym_res["Status"]:
+                st.success(sym_res["Status"])
+            else:
+                st.warning(sym_res["Status"])
+            st.write(f"**Simplified Difference:** `{sym_res['Simplified Difference']}`")
 
     with tabs[1]:
-        st.header("Equations & Inequalities")
-        eq_input = st.text_input("Equation $f(x) = 0$:", "x^3 - 8")
-        if st.button("Solve Exact Equation"):
-            sol_res = CASRouter.solve(eq_input, "x")
-            st.write(f"- **Status:** `{sol_res['Status']}`")
-            st.write(f"- **Solution Set:**")
-            st.latex(sp.latex(sol_res['Solutions']))
-            
-        st.divider()
-        ineq_input = st.text_input("Inequality (e.g. `x^2 - 4 < 0`):", "x^2 - 4 < 0")
-        if st.button("Solve Inequality"):
-            ineq_res = CASRouter.inequalities(ineq_input)
-            st.write(f"- **Valid Interval:**")
-            st.latex(sp.latex(ineq_res['Interval']))
+        st.header("Numerical Counterexample Search")
+        st.markdown("Monte-Carlo brute force sampling to detect domain violations or false mathematical claims.")
+        
+        nc1, nc2 = st.columns(2)
+        with nc1: c_lhs = st.text_input("Claim LHS:", "(x+y)^2")
+        with nc2: c_rhs = st.text_input("Claim RHS:", "x^2 + y^2")
+        
+        if st.button("Search for Counterexamples"):
+            ce_res = search_counterexample(c_lhs, c_rhs, "x, y", [(1.0, 10.0), (1.0, 10.0)])
+            if "FOUND" in ce_res["Status"]:
+                st.error(ce_res["Status"])
+                st.write(f"- **Failing Coordinate:** `{ce_res['Point']}`")
+                st.write(f"- **LHS vs RHS Value:** `{ce_res['LHS Value']}` vs `{ce_res['RHS Value']}`")
+                st.info(ce_res["Note"])
+            else:
+                st.success(ce_res["Status"])
+                st.info(ce_res["Note"])
 
     with tabs[2]:
-        st.header("Unified Calculus Router")
-        st.markdown("Routes arbitrary symbolic operations to their respective internal engines without numerical fallback.")
+        st.header("Computational Theorem Validation")
+        st.markdown("Independently computes both sides of major calculus theorems to verify alignment.")
+        st.subheader("Green's Theorem")
+        st.latex(r"\oint_C P dx + Q dy = \iint_D \left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}\right) dA")
         
-        rout_op = st.selectbox("Select Core Operator:", ["derivative", "integral_indefinite", "limit", "series", "laplacian"])
-        r1, r2 = st.columns(2)
-        with r1: rout_expr = st.text_input("Expression:", "sin(x*y)")
-        with r2: rout_var = st.text_input("Variable(s):", "x, y" if rout_op == "laplacian" else "x")
+        gt1, gt2 = st.columns(2)
+        with gt1: P_in = st.text_input("P(x,y):", "-y")
+        with gt2: Q_in = st.text_input("Q(x,y):", "x")
         
-        if st.button("Execute Symbolic Operation"):
-            rout_res = CASRouter.calculus_route(rout_op, rout_expr, rout_var)
-            st.latex(sp.latex(rout_res))
-            
-        st.divider()
-        st.subheader("Symbolic vs. Numerical Verification")
-        v1, v2 = st.columns(2)
-        with v1: exp_a = st.text_input("Expression A:", "sin(x)^2 + cos(x)^2")
-        with v2: exp_b = st.text_input("Expression B:", "1")
-        if st.button("Verify Equivalence"):
-            ver_res = CASRouter.verify(exp_a, exp_b, "x")
-            st.json(ver_res)
+        if st.button("Run Theorem Verification"):
+            gt_res = verify_greens_theorem(P_in, Q_in, (0, 1), (0, 1))
+            st.write(f"- **LHS (Line Integral Boundary):** `{gt_res['LHS (Line Integral)']}`")
+            st.write(f"- **RHS (Curl Surface Area):** `{gt_res['RHS (Surface Integral)']}`")
+            if "VERIFIED" in gt_res["Status"]:
+                st.success(f"**Status:** {gt_res['Status']}")
+            else:
+                st.error(f"**Status:** {gt_res['Status']}")
+            st.caption(gt_res["Disclaimer"])
 
     with tabs[3]:
-        st.header("Expression Analytics & Trees")
-        anal_expr = st.text_input("Analyze Expression:", "exp(sqrt(x-2)) / (x-5)")
+        st.header("Computational Scaling Benchmarks")
+        st.markdown("Tracks mathematical engine efficiency across expanding polynomial degrees, matrix sizes, or grid resolutions.")
         
-        if st.button("Generate Analytics"):
-            import sympy as sp
-            # Safe local parse
-            from calculus.symbolic.expression_parser import safe_parse
-            p_expr = safe_parse(anal_expr)
-            
-            c3, c4 = st.columns(2)
-            with c3:
-                st.subheader("Complexity Metrics")
-                st.json(analyze_complexity(p_expr))
-            with c4:
-                st.subheader("Domain Restrictions ($\mathbb{R}$)")
-                st.write(find_domain_restrictions(p_expr, sp.Symbol('x')))
-            
-            st.subheader("Expression Tree AST")
-            st.json(CASRouter.tree(anal_expr))
+        if st.button("Run Polynomial Derivative Scaling Benchmark"):
+            with st.spinner("Benchmarking SymPy Scaling..."):
+                scaling_data = scaling_test_polynomial_derivative(max_degree=200)
+                st.pyplot(plot_benchmark_scaling(scaling_data))
+                st.info("Demonstrates execution time scaling for symbolic AST traversal as polynomial complexity increases.")
 
     with tabs[4]:
-        st.header("Interactive CAS Notebook")
-        st.markdown("Maintain a stateless or session-stored execution list of operations.")
-        
-        if "cas_history" not in st.session_state:
-            st.session_state.cas_history = []
+        st.header("Structured Verification Reports")
+        if st.button("Generate Laboratory Meta-Report"):
+            sample_data = {
+                "Identities": verify_symbolic_identity("tan(x)", "sin(x)/cos(x)"),
+                "Theorems": verify_greens_theorem("-y", "x", (0, 1), (0, 1))
+            }
+            report_md = generate_verification_report(sample_data, format="markdown")
+            st.markdown(report_md)
             
-        cmd_in = st.text_input("Notebook Input (Use syntax: `operation: expression`. E.g., `simplify: x*x/x`):")
-        
-        if st.button("Execute Cell"):
-            try:
-                op, exp = cmd_in.split(":", 1)
-                op, exp = op.strip().lower(), exp.strip()
-                if op == "simplify": out = CASRouter.simplify(exp)
-                elif op in ["expand", "factor", "cancel", "apart"]: out = CASRouter.algebra(exp, op)
-                else: out = "Unsupported Command. Try: simplify, expand, factor, cancel, apart."
-                
-                st.session_state.cas_history.insert(0, {"In": cmd_in, "Out": out})
-            except Exception as e:
-                st.error(f"Notebook syntax error: {e}")
-                
-        if st.button("Clear History"):
-            st.session_state.cas_history = []
-            
-        for idx, cell in enumerate(st.session_state.cas_history):
-            st.markdown(f"**In [{len(st.session_state.cas_history) - idx}]:** `{cell['In']}`")
-            st.latex(sp.latex(cell["Out"]) if isinstance(cell["Out"], sp.Expr) else cell["Out"])
-            st.divider()
+            st.download_button("Download JSON Report", data=generate_verification_report(sample_data, format="json"), file_name="verification_report.json")
