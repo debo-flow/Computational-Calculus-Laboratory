@@ -1,121 +1,109 @@
-# ... [Keep Milestones 1 to 18 unchanged] ...
+# ... [Keep Milestones 1 to 19 unchanged] ...
 
-elif page == "Milestone 19: Adv. Differential Equations":
-    st.title("Advanced Differential Equations & Dynamical Systems Laboratory")
-    st.markdown("Solve First-Order systems symbolically, benchmark convergence, and map multidimensional Phase Space.")
+elif page == "Milestone 20: Calculus of Variations":
+    st.title("Advanced Calculus of Variations & Functional Optimization")
+    st.markdown("Derive Euler-Lagrange equations, compute first variations, and minimize action functionals $J[y]$.")
 
-    from calculus.differential_equations.ode_analysis import classify_ode, empirical_convergence_study
-    from calculus.differential_equations.first_order import analyze_bernoulli, analyze_exact
-    from calculus.differential_equations.symbolic_solver import solve_symbolic_ode
-    from calculus.differential_equations.numerical_solver import solve_fixed_step, solve_adaptive
-    from calculus.differential_equations.systems import create_numerical_system, CLASSIC_MODELS
-    from calculus.differential_equations.equilibrium import find_equilibria
-    from calculus.differential_equations.stability import analyze_stability
-    from visualization.ode_plots import plot_direction_field_with_trajectories, plot_solver_comparison, plot_phase_portrait_complete
+    from calculus.variations.functional import Functional
+    from calculus.variations.euler_lagrange import derive_euler_lagrange
+    from calculus.variations.variational_derivatives import compute_first_variation
+    from calculus.variations.extremals import solve_extremal
+    from calculus.variations.numerical_variations import numerical_functional_optimization
+    from calculus.variations.variation_analysis import calculate_el_residual
+    from calculus.variations.constraints import setup_isoperimetric_problem
+    from visualization.variation_plots import plot_extremal_comparison, plot_el_residual
 
     tabs = st.tabs([
-        "ODE Classification & Symbolic", 
-        "First-Order Deep Analysis",
-        "Numerical Solvers & Convergence", 
-        "Phase Space & Nullclines",
-        "Dynamical Systems Explorer"
+        "Symbolic Euler-Lagrange", 
+        "Numerical Functional Optimization", 
+        "Variations & Perturbations", 
+        "Isoperimetric & Constraints"
     ])
 
     with tabs[0]:
-        st.header("Symbolic Classification & Solutions")
-        c1, c2 = st.columns([2, 1])
-        with c1: eq_input = st.text_input("ODE (use y' and y''):", "y'' + y = 0")
-        with c2: ivp_input = st.text_input("IVP (e.g. y(0)=1, y'(0)=0):", "y(0)=1, y'(0)=0")
+        st.header("Euler-Lagrange Extrema Generation")
+        st.markdown(r"For $J[y] = \int_a^b F(x, y, y') dx$, a necessary condition for an extremal is $\frac{\partial F}{\partial y} - \frac{d}{dx}\left(\frac{\partial F}{\partial y'}\right) = 0$.")
         
-        class_res = classify_ode(eq_input)
-        if "Error" not in class_res:
-            st.write(f"- **Order:** `{class_res['Order']}` | **Type:** `{class_res['Linearity']}`, `{class_res['Homogeneity']}`")
-            st.write(f"- **Properties:** Exact: `{class_res['Exact']}`, Separable: `{class_res['Separable']}`, Bernoulli: `{class_res['Bernoulli']}`")
+        st.info("Notation: Use `y` for $y(x)$, `yp` for $y'(x)$, and `ypp` for $y''(x)$.")
+        f_input = st.text_input("Integrand F(x, y, y'):", value="sqrt(1 + yp^2)", key="f1")
         
-        if st.button("Solve Symbolically & Verify"):
-            ivp_dict = {k.strip(): float(v.strip()) for k, v in [cond.split('=') for cond in ivp_input.split(',')] if cond} if ivp_input else {}
-            sol_res = solve_symbolic_ode(eq_input, ivp=ivp_dict)
-            if sol_res["Status"] == "Success":
-                st.success("✅ Analytical Solution Verified via Substitution (Residual = 0)")
-                st.latex(sp.latex(sol_res["Solution"]))
+        if st.button("Derive Euler-Lagrange Equation"):
+            fnc = Functional(f_input)
+            el_data = derive_euler_lagrange(fnc)
+            
+            st.write(f"- **$\partial F / \partial y$:** `{el_data['∂F/∂y']}`")
+            st.write(f"- **$\partial F / \partial y'$:** `{el_data['∂F/∂y\'']}`")
+            st.write(f"- **$d/dx (\partial F / \partial y')$:** `{el_data['d/dx(∂F/∂y\')']}`")
+            st.latex(r"\text{Euler-Lagrange Equation: } " + sp.latex(el_data["EL Equation"]))
+            
+            ext_res = solve_extremal(fnc)
+            if ext_res["Status"] == "Success":
+                st.success("✅ Symbolic Candidate Extremal Found:")
+                st.latex(sp.latex(ext_res["Candidate Extremal"]))
             else:
-                st.error(sol_res["Error"])
+                st.warning(f"Symbolic integration failed or ODE is non-elementary. Use the Numerical Optimizer. ({ext_res.get('Error', '')})")
 
     with tabs[1]:
-        st.header("First-Order Equation Sub-Analysis")
-        anal_type = st.radio("Select Analysis Type:", ["Exact Equation Check", "Bernoulli Substitution"])
+        st.header("Numerical Discretization & Direct Minimization")
+        st.markdown("Approximates the continuous functional $J[y]$ using a finite grid and minimizes the resulting multivariable function via BFGS.")
         
-        if anal_type == "Exact Equation Check":
-            st.markdown(r"Forms $M(x,y)dx + N(x,y)dy = 0$")
-            e1, e2 = st.columns(2)
-            with e1: m_str = st.text_input("M(x,y):", "2*x*y")
-            with e2: n_str = st.text_input("N(x,y):", "x^2 + 3*y^2")
-            ex_res = analyze_exact(m_str, n_str)
-            st.write(f"$\partial M / \partial y = {sp.latex(ex_res['dM/dy'])}$, $\partial N / \partial x = {sp.latex(ex_res.get('dN/dx', 'N/A'))}$")
-            if ex_res["Exact"]:
-                st.success("Equation is Exact.")
-                st.latex(r"F(x,y) = " + sp.latex(ex_res["Potential F(x,y)"]) + r" = C")
-            else:
-                st.warning("Equation is not Exact.")
+        c1, c2, c3, c4 = st.columns(4)
+        with c1: a_val = st.number_input("x_a:", value=0.0)
+        with c2: b_val = st.number_input("x_b:", value=1.0)
+        with c3: y_a = st.number_input("y(a):", value=0.0)
+        with c4: y_b = st.number_input("y(b):", value=1.0)
+        
+        f_num_in = st.text_input("Integrand F(x,y,y') for minimization:", value="0.5 * yp^2") # Dirichlet Energy -> Straight line
+        
+        if st.button("Run Numerical Functional Optimization"):
+            fnc_num = Functional(f_num_in)
+            res_opt = numerical_functional_optimization(fnc_num, a_val, b_val, y_a, y_b, N=40)
+            
+            if res_opt["Status"] == "Converged":
+                st.success(f"✅ Minimization Converged in {res_opt['Iterations']} iterations. Optimal $J[y] \approx {res_opt['J_min']:.6f}$")
                 
-        elif anal_type == "Bernoulli Substitution":
-            st.markdown(r"Forms $y' + P(x)y = Q(x)y^n$")
-            b1, b2, b3 = st.columns(3)
-            with b1: bp_str = st.text_input("P(x):", "1/x")
-            with b2: bq_str = st.text_input("Q(x):", "x")
-            with b3: bn_val = st.number_input("n:", value=2.0)
-            ber_res = analyze_bernoulli(bp_str, bq_str, bn_val)
-            if ber_res["Status"] == "Success":
-                st.latex(sp.latex(ber_res["Linearized v Equation"]))
-                st.latex(sp.latex(ber_res["Final Implicit/Explicit y(x)"]))
+                # Try to get symbolic reference for plot
+                sym_sol = solve_extremal(fnc_num, {"a": a_val, "b": b_val, "A": y_a, "B": y_b})
+                ref_expr = sym_sol["Candidate Extremal"].rhs if sym_sol["Status"] == "Success" else None
+                
+                st.pyplot(plot_extremal_comparison(res_opt["x"], res_opt["y"], ref_expr, a_val, b_val))
+                
+                st.subheader("Euler-Lagrange Residual Check")
+                st.markdown("If the numerical profile is a true extremal, the residual $R(x)$ of the EL equation should locally approach 0.")
+                resid = calculate_el_residual(fnc_num, res_opt["x"], res_opt["y"])
+                st.pyplot(plot_el_residual(res_opt["x"][1:-1], resid[1:-1])) # Trim noisy edges
+            else:
+                st.error(res_opt["Message"])
 
     with tabs[2]:
-        st.header("Numerical Error & Direction Fields")
-        st.markdown(r"Compare Euler $O(h)$, Heun $O(h^2)$, Midpoint $O(h^2)$, and RK4 $O(h^4)$.")
+        st.header("First Variation & Trial Functions")
+        st.markdown(r"Evaluates $\delta J = \frac{d}{d\epsilon} J[y + \epsilon \eta] \big\vert{}_{\epsilon=0}$")
+        v_input = st.text_input("Integrand F:", "yp^2", key="f2")
         
-        n_eq = st.text_input("dy/dx = f(x,y):", "x - y")
-        f_num = create_numerical_system([n_eq], "y")
-        def f_wrap(x, y): return f_num(x, y)[0]
-        
-        if st.button("Generate Direction Field & Compare Solvers"):
-            results = {}
-            for method in ["Euler", "Heun", "Midpoint", "RK4"]:
-                x_num, y_num, _ = solve_fixed_step(f_wrap, 0.0, np.array([1.0]), 3.0, 0.5, method)
-                results[method] = y_num
+        if st.button("Compute First Variation"):
+            v_fnc = Functional(v_input)
+            v_res = compute_first_variation(v_fnc)
+            st.latex(r"\delta F = " + sp.latex(v_res["First Variation δF"]))
+            st.info(v_res["Interpretation"])
             
-            st.pyplot(plot_solver_comparison(x_num, results))
-            # Direction Field with RK4 Trajectory
-            t_x, t_y, _ = solve_fixed_step(f_wrap, -3.0, np.array([0.0]), 3.0, 0.1, "RK4")
-            st.pyplot(plot_direction_field_with_trajectories(n_eq, (-3, 3), (-3, 3), [(t_x, t_y[:, 0])]))
+        st.divider()
+        st.subheader("Trial Function Evaluator")
+        trial_str = st.text_input("Trial Function y(x):", "x^2")
+        if st.button("Evaluate Functional J[y]"):
+            v_fnc = Functional(v_input)
+            e_res = v_fnc.evaluate_trial_function(trial_str, 0, 1)
+            if "Error" not in e_res:
+                st.latex(r"J[y_{trial}] = \int_0^1 \left(" + sp.latex(e_res["Evaluated Integrand"]) + r"\right) dx = " + str(e_res["Exact J"]))
+            else:
+                st.error(e_res["Error"])
 
     with tabs[3]:
-        st.header("Phase Space, Nullclines & Stability")
-        s1, s2 = st.columns(2)
-        with s1: dx_dt = st.text_input("dx/dt = f(x,y):", "x - x*y")
-        with s2: dy_dt = st.text_input("dy/dt = g(x,y):", "x*y - y")
+        st.header("Constrained Variational Problems")
+        st.markdown("Constructs the modified Lagrangian $H = F + \lambda G$ for Isoperimetric problems.")
+        iso_F = st.text_input("Objective Integrand F (e.g. maximize area):", "y")
+        iso_G = st.text_input("Constraint Integrand G (e.g. fixed perimeter):", "sqrt(1 + yp^2)")
         
-        eqs = [dx_dt, dy_dt]
-        equilibria = find_equilibria(eqs, "x, y")
-        st.pyplot(plot_phase_portrait_complete(eqs, "x, y", (-1, 3), (-1, 3), equilibria))
-        
-        if equilibria:
-            for eq in equilibria:
-                stab = analyze_stability(eqs, "x, y", eq)
-                st.write(f"- **Equilibrium `{eq}`:** `{stab.get('Classification')}` (Eigenvalues: `{stab.get('Eigenvalues')}`)")
-
-    with tabs[4]:
-        st.header("Classical Parameter Explorer")
-        model = st.selectbox("Select Model:", list(CLASSIC_MODELS.keys()))
-        data = CLASSIC_MODELS[model]
-        
-        params = {}
-        cols = st.columns(len(data["params"]))
-        for i, p in enumerate(data["params"]):
-            params[p] = cols[i].number_input(f"Parameter '{p}':", value=1.0)
-            
-        sys_subbed = [str(sp.sympify(eq).subs(params)) for eq in data["sys"]]
-        st.latex("System: " + ", ".join([sp.latex(sp.sympify(eq)) for eq in sys_subbed]))
-        
-        if len(data["vars"].split(',')) == 2:
-            eqs2 = find_equilibria(sys_subbed, data["vars"])
-            st.pyplot(plot_phase_portrait_complete(sys_subbed, data["vars"], (-2, 2), (-2, 2), eqs2))
+        if st.button("Generate Modified Problem"):
+            iso_res = setup_isoperimetric_problem(iso_F, iso_G)
+            st.latex(r"H = F + \lambda G = " + sp.latex(iso_res["Modified Integrand H"]))
+            st.info("Applying the Euler-Lagrange generator to $H$ yields the constrained extremal.")
