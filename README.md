@@ -1,31 +1,32 @@
 # Computational Calculus Laboratory
 
-**Milestone 23 — Advanced Symbolic Mathematics & Computer Algebra Laboratory**
+**Milestone 24 — Automated Theorem Verification, Validation & Benchmarking Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 23 introduces a centralized **Computer Algebra System (CAS) Layer**. This overarching subsystem consolidates the disparate symbolic operations from Milestones 1-22 into a safe, unified routing interface. It actively protects the Python kernel from arbitrary code execution via strict dictionary filtering, applies deep mathematical Assumption conditions ($\mathbb{R}^+, \mathbb{Z}$), and generates visual Abstract Syntax Trees (AST).
+Milestone 24 introduces the **Automated Theorem Verification, Validation & Benchmarking Laboratory**. This final operational layer acts as the rigorous testing and validation engine for the entire ecosystem. It systematically isolates mathematical proof (symbolic identity verification) from computational evidence (numerical counterexample searches), tracks algorithmic scaling efficiency, computationally validates major theorems (e.g., Green's Theorem), and enforces continuous integration (CI) regression safety.
 
 ## Features Implemented
 
-### Milestone 23: Symbolic Mathematics & CAS
-* **Safe Expression Parser:** A rigorously sandboxed parsing wrapper around SymPy that strips `__builtins__` and prevents `eval()` injections, translating human input (e.g., `x^2`) into exact symbolic objects without triggering dangerous code execution.
-* **Unified Calculus Router:** A central Facade module that fields user operations (`limit`, `derivative`, `integral_indefinite`, `laplacian`) and dispatches them natively across the ecosystem. 
-* **Algebraic Manipulations & Equivalence:** Exact algorithmic operations (`expand`, `factor`, `cancel`, `apart`). Features a dual-validation Equivalence engine that symbolically simplifies $A - B = 0$ while concurrently cross-validating the identity numerically over a randomized continuous domain matrix.
-* **Equations & Inequalities:** Maps $f(x)=0$ and $f(x) < 0$ bounds to return structured interval sets, supporting exact complex/real domain extraction.
-* **Assumptions Engine:** Allows runtime enforcement of mathematical limits (e.g., setting variables to strictly Positive Reals) to safely unlock otherwise invalid topological simplifications (like $\sqrt{x^2} = x$).
-* **CAS Interactive Notebook:** Emulates Mathematica/Jupyter cell behaviors inside the UI, retaining step-by-step histories of sequential transformations via session state.
+### Milestone 24: Verification & Benchmarking
+* **Symbolic Identity Verification:** Rigorously proves algebraic/calculus equivalence by symbolically reducing $LHS - RHS$ to exactly $0$ using the internal CAS engine.
+* **Numerical Counterexample Search:** Deploys Monte-Carlo domain sampling to hunt for floating-point violations of proposed mathematical claims, strictly distinguishing empirical validation from formal proof.
+* **Computational Theorem Validation:** Independently evaluates dual mathematical pathways (e.g., mapping Line Integrals against Double Integrals for Green's Theorem) to computationally verify foundational calculus theorems.
+* **Algorithmic Benchmarking:** Tracks and plots mathematical engine efficiency, measuring execution time scaling across expanding polynomial degrees, matrix sizes, or grid resolutions.
+* **Structured Verification Reports:** Serializes comprehensive regression benchmarks, theorem validations, and environment metadata into reproducible JSON and Markdown reports.
+* **Continuous Integration (CI/CD):** Implements GitHub Actions (`verification.yml`) to automatically execute the mathematical regression suite (`pytest`) on every repository push.
 
 ### Earlier Milestones (Preserved)
+* **M23:** Symbolic Mathematics & Computer Algebra System (CAS).
 * **M22:** Scientific Computing & Numerics (Precision, SVD, Extrapolation).
 * **M21:** Tensor Calculus & Differential Geometry (Christoffel, Curvatures).
 * **M20:** Calculus of Variations (Euler-Lagrange, Numerical Functionals).
 * **M19-M14:** Advanced Differential Equations (IVPs, BVPs, Chaos, Stiff Systems).
-* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Theorems).
+* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Green/Stokes Theorems).
 * **M12:** Multiple Integrals (Iterated, Monte Carlo, Jacobians).
-* **M11:** Multivariable Calculus.
-* **M10:** Advanced Taylor Series.
+* **M11:** Multivariable Calculus (Gradients, Jacobians, Hessian).
+* **M10:** Advanced Taylor Series (Polynomials, Error Bounds).
 * **M9:** Advanced Sequences & Infinite Series.
 * **M8:** Advanced Numerical Integration.
 * **M7:** Advanced Integral Calculus.
@@ -41,7 +42,7 @@ Milestone 23 introduces a centralized **Computer Algebra System (CAS) Layer**. T
 * Mathematics: SymPy, NumPy, SciPy, mpmath
 * Visualization: Matplotlib
 * UI Framework: Streamlit
-* Testing: Pytest
+* Testing & CI: Pytest, GitHub Actions
 
 ## Installation & Running
 ```bash
