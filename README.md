@@ -1,23 +1,23 @@
 # Computational Calculus Laboratory
 
-**Milestone 19 — Advanced Differential Equations & Dynamical Systems Laboratory**
+**Milestone 20 — Advanced Calculus of Variations & Functional Optimization Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 19 refines and finalizes the **Dynamical Systems Laboratory**. It implements meticulous symbolic parsing for First-Order differential equations (Separable, Exact, Linear, Bernoulli) verifying all analytical solutions through exact residual substitution. It strictly integrates $N$-dimensional autonomous vector fields, tracking invariant nullclines, topological phase limits, and empirical $p$-order numerical convergence testing.
+Milestone 20 completes the transition from ordinary calculus into **Functional Calculus**. It introduces the **Calculus of Variations Laboratory**, allowing users to rigorously optimize functionals $J[y] = \int F(x, y, y') dx$. It features exact symbolic Euler-Lagrange derivation alongside Ritz-style numerical discretization grids, bridging classical analytical mechanics (e.g., Shortest Paths, Brachistochrones, Action Minimization) with modern computational optimization.
 
 ## Features Implemented
 
-### Milestone 19: Differential Equations Finalization
-* **Explicit First-Order Parsing:** Automatically routes and solves Bernoulli substitutions ($v = y^{1-n}$), Linear Integrating Factors ($\mu(x) = e^{\int P dx}$), and Exact Potential Functions ($F(x,y)=C$). 
-* **Convergence Verification Benchmarks:** Implements empirical stepwise convergence loops evaluating $p \approx \log(E_1/E_2)/\log(h_1/h_2)$ against exact integration bounds across Euler, Heun, Midpoint, and RK4 steppers.
-* **Topological Phase Space:** Extracts symbolic $f(x,y)=0$ and $g(x,y)=0$ Nullclines overlaid across normalized direction/streamline vector fields to map global dynamical flow.
-* **Equilibrium & Linearized Stability:** Computes the Jacobian matrix $\partial F / \partial X$ at $F(X)=0$, extracting Eigenvalues to decisively classify local geometric stability (Saddles, Nodes, Foci, Centers).
-* **Classical Parameter Explorer:** Interactive sandbox for famous biological/physical dynamical limits (Lotka-Volterra Predator-Prey, Damped/Harmonic Oscillators, Logistic Growth).
+### Milestone 20: Calculus of Variations
+* **Symbolic Euler-Lagrange Derivation:** Exact expansion of $\frac{\partial F}{\partial y} - \frac{d}{dx}\left(\frac{\partial F}{\partial y'}\right) = 0$ utilizing SymPy chain-rule tracking for arbitrary integrands.
+* **Numerical Functional Minimization:** Directly discretizes the functional $J[y]$ over a spatial grid and leverages SciPy's `BFGS` optimizer to iteratively warp boundary-locked trial vectors into minimum-energy extremal states.
+* **Extremal vs. Analytical Residuals:** Evaluates the discretized numerical arrays directly against the symbolic Euler-Lagrange PDE to chart local $R(x)$ residuals, verifying true numerical convergence.
+* **First Variation ($\delta J$) Analysis:** Symbolically computes $\frac{d}{d\epsilon} F(y + \epsilon \eta) \big\vert{}_{\epsilon=0}$ to demonstrate rigorous perturbation theory.
+* **Isoperimetric Constraints:** Generates Lagrange Multiplier functional bridges $H = F + \lambda G$ to support length/area constrained physics problems (e.g., Dido's problem).
 
 ### Earlier Milestones (Preserved)
-* **M18-M14:** Advanced BVPs/IVPs, Shooting Methods, Bifurcation/Sensitivity, Stiff ODE frameworks.
+* **M19-M14:** Advanced Differential Equations (IVPs, BVPs, Chaos, Stiff Systems).
 * **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Green/Stokes Theorems).
 * **M12:** Multiple Integrals (Iterated, Monte Carlo, Jacobians, Laminas).
 * **M11:** Multivariable Calculus (Gradients, Jacobians, Hessian).
