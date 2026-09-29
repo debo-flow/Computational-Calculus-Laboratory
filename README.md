@@ -1,28 +1,29 @@
 # Computational Calculus Laboratory
 
-**Milestone 22 — Advanced Numerical Calculus & Scientific Computing Laboratory**
+**Milestone 23 — Advanced Symbolic Mathematics & Computer Algebra Laboratory**
 
 ## Project Description
 The Computational Calculus Laboratory is an extensible Python-based interactive mathematics environment. 
 
-Milestone 22 introduces the **Scientific Computing Laboratory**, bridging continuous mathematics with discrete numerical implementations. This suite explicitly quantifies algorithmic accuracy vs. precision limits, mapping machine round-off behaviors, truncation boundaries, condition number sensitivities, and establishing explicit finite-difference PDE solver stability limits.
+Milestone 23 introduces a centralized **Computer Algebra System (CAS) Layer**. This overarching subsystem consolidates the disparate symbolic operations from Milestones 1-22 into a safe, unified routing interface. It actively protects the Python kernel from arbitrary code execution via strict dictionary filtering, applies deep mathematical Assumption conditions ($\mathbb{R}^+, \mathbb{Z}$), and generates visual Abstract Syntax Trees (AST).
 
 ## Features Implemented
 
-### Milestone 22: Scientific Computing & Numerics
-* **Problem Conditioning & Precision:** Isolates algorithmic instability from inherent mathematical sensitivity by computing Relative Condition Numbers ($K$). Evaluates numerical artifacts up to 100-digit precision utilizing `mpmath`.
-* **Numerical Linear Algebra:** Generates robust Singular Value Decompositions ($A = U \Sigma V^T$) and Eigen-system solvers, calculating tight residual bounds ($\vert{}\vert{}Av - \lambda v\vert{}\vert{}$) for validation.
-* **PDE Stability Foundations:** Implements FTCS grid stepping for the 1D Heat Equation ($u_t = \alpha u_{xx}$), strictly enforcing and visually demonstrating exponential blow-up when the Courant–Friedrichs–Lewy (CFL) limit ($\Delta t \le \frac{\Delta x^2}{2\alpha}$) is breached.
-* **Richardson Extrapolation:** Eliminates lowest-order numerical truncation error terms to drastically artificially inflate the order of accuracy of derivative approximations.
-* **Cubic Spline Interpolation:** Reconstructs continuous piecewise functions over discrete, unordered datasets using globally enforced boundary stiffness (Natural Splines).
-* **Reproducibility Benchmarking:** Injects Python versioning, architectural metadata, and millisecond execution metrics into JSON scientific reports for rigorous academic replication.
+### Milestone 23: Symbolic Mathematics & CAS
+* **Safe Expression Parser:** A rigorously sandboxed parsing wrapper around SymPy that strips `__builtins__` and prevents `eval()` injections, translating human input (e.g., `x^2`) into exact symbolic objects without triggering dangerous code execution.
+* **Unified Calculus Router:** A central Facade module that fields user operations (`limit`, `derivative`, `integral_indefinite`, `laplacian`) and dispatches them natively across the ecosystem. 
+* **Algebraic Manipulations & Equivalence:** Exact algorithmic operations (`expand`, `factor`, `cancel`, `apart`). Features a dual-validation Equivalence engine that symbolically simplifies $A - B = 0$ while concurrently cross-validating the identity numerically over a randomized continuous domain matrix.
+* **Equations & Inequalities:** Maps $f(x)=0$ and $f(x) < 0$ bounds to return structured interval sets, supporting exact complex/real domain extraction.
+* **Assumptions Engine:** Allows runtime enforcement of mathematical limits (e.g., setting variables to strictly Positive Reals) to safely unlock otherwise invalid topological simplifications (like $\sqrt{x^2} = x$).
+* **CAS Interactive Notebook:** Emulates Mathematica/Jupyter cell behaviors inside the UI, retaining step-by-step histories of sequential transformations via session state.
 
 ### Earlier Milestones (Preserved)
+* **M22:** Scientific Computing & Numerics (Precision, SVD, Extrapolation).
 * **M21:** Tensor Calculus & Differential Geometry (Christoffel, Curvatures).
 * **M20:** Calculus of Variations (Euler-Lagrange, Numerical Functionals).
-* **M19-M14:** Advanced Differential Equations (IVPs, BVPs, Chaos).
-* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux).
-* **M12:** Multiple Integrals (Iterated, Monte Carlo).
+* **M19-M14:** Advanced Differential Equations (IVPs, BVPs, Chaos, Stiff Systems).
+* **M13:** Advanced Vector Calculus (Divergence, Curl, Flux, Theorems).
+* **M12:** Multiple Integrals (Iterated, Monte Carlo, Jacobians).
 * **M11:** Multivariable Calculus.
 * **M10:** Advanced Taylor Series.
 * **M9:** Advanced Sequences & Infinite Series.
